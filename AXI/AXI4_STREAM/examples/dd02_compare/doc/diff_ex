@@ -1,0 +1,251 @@
+							      >	/* local copy due:
+							      >	 * SBY 10:22:17 [amba_axi4_stream_seda_verify_provemode] base
+							      >	 * SBY 10:22:17 [amba_axi4_stream_seda_verify_provemode] base
+							      >	 * SBY 10:22:17 [amba_axi4_stream_seda_verify_provemode] base
+							      >	 * SBY 10:22:17 [amba_axi4_stream_seda_verify_provemode] base
+							      >	 * SBY 10:22:17 [amba_axi4_stream_seda_verify_provemode] base
+							      >	 * SBY 10:22:17 [amba_axi4_stream_seda_verify_provemode] base
+							      >	 * SBY 10:22:17 [amba_axi4_stream_seda_verify_provemode] base
+							      >	 * SBY 10:22:17 [amba_axi4_stream_seda_verify_provemode] base
+							      >	 * SBY 10:22:17 [amba_axi4_stream_seda_verify_provemode] base
+							      >	 * SBY 10:22:17 [amba_axi4_stream_seda_verify_provemode] base
+							      >	 * SBY 10:22:17 [amba_axi4_stream_seda_verify_provemode] base
+							      >	 * SBY 10:22:17 [amba_axi4_stream_seda_verify_provemode] base
+							      >
+/////////////////////////////////////////////////////////////	/////////////////////////////////////////////////////////////
+//								//
+// Filename: 	faxis_slave.v					// Filename: 	faxis_slave.v
+//								//
+// Project:	Pipelined Wishbone to AXI converter		// Project:	Pipelined Wishbone to AXI converter
+//								//
+// Purpose:	Formal properties for verifying the proper fu	// Purpose:	Formal properties for verifying the proper fu
+//		AXI Stream slave.				//		AXI Stream slave.
+//								//
+// Creator:	Dan Gisselquist, Ph.D.				// Creator:	Dan Gisselquist, Ph.D.
+//		Gisselquist Technology, LLC			//		Gisselquist Technology, LLC
+//								//
+/////////////////////////////////////////////////////////////	/////////////////////////////////////////////////////////////
+//								//
+// Copyright (C) 2019, Gisselquist Technology, LLC		// Copyright (C) 2019, Gisselquist Technology, LLC
+//								//
+// This program is free software (firmware): you can redistri	// This program is free software (firmware): you can redistri
+// modify it under the terms of  the GNU General Public Licen	// modify it under the terms of  the GNU General Public Licen
+// by the Free Software Foundation, either version 3 of the L	// by the Free Software Foundation, either version 3 of the L
+// your option) any later version.				// your option) any later version.
+//								//
+// This program is distributed in the hope that it will be us	// This program is distributed in the hope that it will be us
+// ANY WARRANTY; without even the implied warranty of MERCHAN	// ANY WARRANTY; without even the implied warranty of MERCHAN
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Pub	// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Pub
+// for more details.						// for more details.
+//								//
+// You should have received a copy of the GNU General Public 	// You should have received a copy of the GNU General Public 
+// with this program.  (It's in the $(ROOT)/doc directory, ru	// with this program.  (It's in the $(ROOT)/doc directory, ru
+// target there if the PDF file isn't present.)  If not, see	// target there if the PDF file isn't present.)  If not, see
+// <http://www.gnu.org/licenses/> for a copy.			// <http://www.gnu.org/licenses/> for a copy.
+//								//
+// License:	GPL, v3, as defined and found on www.gnu.org,	// License:	GPL, v3, as defined and found on www.gnu.org,
+//		http://www.gnu.org/licenses/gpl.html		//		http://www.gnu.org/licenses/gpl.html
+//								//
+//								//
+/////////////////////////////////////////////////////////////	/////////////////////////////////////////////////////////////
+//								//
+//								//
+`default_nettype none						`default_nettype none
+//								//
+module	faxis_slave(i_aclk, i_aresetn,				module	faxis_slave(i_aclk, i_aresetn,
+	i_tvalid, i_tready,						i_tvalid, i_tready,
+	i_tdata, i_tstrb, i_tkeep, i_tlast, i_tid,			i_tdata, i_tstrb, i_tkeep, i_tlast, i_tid,
+	i_tdest, i_tuser,						i_tdest, i_tuser,
+	f_bytecount, f_routecheck);					f_bytecount, f_routecheck);
+	parameter	F_MAX_PACKET = 0;				parameter	F_MAX_PACKET = 0;
+	parameter	F_MIN_PACKET = 0;				parameter	F_MIN_PACKET = 0;
+	parameter	F_MAX_STALL  = 0;				parameter	F_MAX_STALL  = 0;
+	parameter	C_S_AXI_DATA_WIDTH  = 32;			parameter	C_S_AXI_DATA_WIDTH  = 32;
+	parameter	C_S_AXI_ID_WIDTH = 1;				parameter	C_S_AXI_ID_WIDTH = 1;
+	parameter	C_S_AXI_ADDR_WIDTH = 1;				parameter	C_S_AXI_ADDR_WIDTH = 1;
+	parameter	C_S_AXI_USER_WIDTH = 1;				parameter	C_S_AXI_USER_WIDTH = 1;
+	//								//
+	// F_LGDEPTH is the number of bits necessary to repre		// F_LGDEPTH is the number of bits necessary to repre
+	// length							// length
+	parameter	F_LGDEPTH = 32;					parameter	F_LGDEPTH = 32;
+	//								//
+	localparam	AW  = C_S_AXI_ADDR_WIDTH;			localparam	AW  = C_S_AXI_ADDR_WIDTH;
+	localparam	DW  = C_S_AXI_DATA_WIDTH;			localparam	DW  = C_S_AXI_DATA_WIDTH;
+	localparam	IDW  = C_S_AXI_ID_WIDTH;			localparam	IDW  = C_S_AXI_ID_WIDTH;
+	localparam	UW  = C_S_AXI_USER_WIDTH;			localparam	UW  = C_S_AXI_USER_WIDTH;
+	//								//
+	//								//
+	input	wire			i_aclk, i_aresetn;		input	wire			i_aclk, i_aresetn;
+	input	wire			i_tvalid;			input	wire			i_tvalid;
+	input	wire			i_tready = 1'b1;      |		input	wire			i_tready /*= 1'b1*/;
+	input	wire	[DW-1:0]	i_tdata;			input	wire	[DW-1:0]	i_tdata;
+	input	wire	[DW/8-1:0]	i_tstrb = i_tkeep;    |		input	wire	[DW/8-1:0]	i_tstrb /*= i_tkeep*/
+	input	wire	[DW/8-1:0]	i_tkeep = {(DW/8){1'b |		input	wire	[DW/8-1:0]	i_tkeep /*= {(DW/8){1
+	input	wire			i_tlast;			input	wire			i_tlast;
+	input	wire	[(IDW>0?IDW:1)-1:0]	i_tid = {(IDW |		input	wire	[(IDW>0?IDW:1)-1:0]	i_tid   /*= {
+	input	wire	[(AW>0?AW:1)-1:0]	i_tdest = {(A |		input	wire	[(AW>0?AW:1)-1:0]	i_tdest /*= {
+	input	wire	[(UW>0?UW:1)-1:0]	i_tuser = {(U |		input	wire	[(UW>0?UW:1)-1:0]	i_tuser /*= {
+	//								//
+	output	reg	[F_LGDEPTH-1:0]	f_bytecount;			output	reg	[F_LGDEPTH-1:0]	f_bytecount;
+	(* anyconst *) output	reg	[AW+IDW-1:0]	f_rou		(* anyconst *) output	reg	[AW+IDW-1:0]	f_rou
+
+`define	SLAVE_ASSUME	assume					`define	SLAVE_ASSUME	assume
+`define	SLAVE_ASSERT	assert					`define	SLAVE_ASSERT	assert
+
+	localparam	F_STALLBITS	= (F_MAX_STALL <= 1)		localparam	F_STALLBITS	= (F_MAX_STALL <= 1)
+						? 1 : $clog2(							? 1 : $clog2(
+	reg				f_past_valid;			reg				f_past_valid;
+	reg	[F_LGDEPTH-1:0]		f_vbytes;			reg	[F_LGDEPTH-1:0]		f_vbytes;
+	reg	[F_STALLBITS-1:0]	f_stall_count;			reg	[F_STALLBITS-1:0]	f_stall_count;
+	integer	iB;							integer	iB;
+	genvar	k;							genvar	k;
+
+	//								//
+	// f_past_valid is used to make certain that temporal		// f_past_valid is used to make certain that temporal
+	// depending upon past values depend upon *valid* pas		// depending upon past values depend upon *valid* pas
+	// It is true for all clocks other than the first clo		// It is true for all clocks other than the first clo
+	initial	f_past_valid = 1'b0;					initial	f_past_valid = 1'b0;
+	always @(posedge i_aclk)					always @(posedge i_aclk)
+		f_past_valid <= 1'b1;						f_past_valid <= 1'b1;
+
+	//								//
+	// Reset should always be active (low) initially		// Reset should always be active (low) initially
+	always @(posedge i_aclk)					always @(posedge i_aclk)
+	if (!f_past_valid)						if (!f_past_valid)
+		`SLAVE_ASSUME(!i_aresetn);					`SLAVE_ASSUME(!i_aresetn);
+
+	//								//
+	// During and following a reset, TVALID should be dea		// During and following a reset, TVALID should be dea
+	always @(posedge i_aclk)					always @(posedge i_aclk)
+	if ((!f_past_valid)||(!i_aresetn)||($past(!i_aresetn)		if ((!f_past_valid)||(!i_aresetn)||($past(!i_aresetn)
+		`SLAVE_ASSUME(!i_tvalid);					`SLAVE_ASSUME(!i_tvalid);
+
+	//								//
+	// If TVALID but not TREADY, then the master isn't al		// If TVALID but not TREADY, then the master isn't al
+	// anything until the slave asserts TREADY.			// anything until the slave asserts TREADY.
+	always @(posedge i_aclk)					always @(posedge i_aclk)
+	if ((f_past_valid)&&($past(i_aresetn))				if ((f_past_valid)&&($past(i_aresetn))
+		&&($past(i_tvalid))&&(!$past(i_tready)))			&&($past(i_tvalid))&&(!$past(i_tready)))
+	begin								begin
+		`SLAVE_ASSUME(i_tvalid);					`SLAVE_ASSUME(i_tvalid);
+		`SLAVE_ASSUME($stable(i_tstrb));				`SLAVE_ASSUME($stable(i_tstrb));
+		`SLAVE_ASSUME($stable(i_tkeep));				`SLAVE_ASSUME($stable(i_tkeep));
+		`SLAVE_ASSUME($stable(i_tlast));				`SLAVE_ASSUME($stable(i_tlast));
+		`SLAVE_ASSUME($stable(i_tid));					`SLAVE_ASSUME($stable(i_tid));
+		`SLAVE_ASSUME($stable(i_tdest));				`SLAVE_ASSUME($stable(i_tdest));
+		`SLAVE_ASSUME($stable(i_tuser));				`SLAVE_ASSUME($stable(i_tuser));
+	end								end
+
+	generate for(k=0; k<DW/8; k=k+1)				generate for(k=0; k<DW/8; k=k+1)
+	begin : CHECK_PARTIAL_DATA					begin : CHECK_PARTIAL_DATA
+
+		// If TVALID && !TREADY, only those TDATA val			// If TVALID && !TREADY, only those TDATA val
+		// high are required to maintain their values			// high are required to maintain their values
+		// becomes true.						// becomes true.
+		always @(posedge i_aclk)					always @(posedge i_aclk)
+		if ((f_past_valid)&&($past(i_aresetn))				if ((f_past_valid)&&($past(i_aresetn))
+			&&($past(i_tvalid))&&(!$past(i_tready				&&($past(i_tvalid))&&(!$past(i_tready
+		begin								begin
+			if (i_tkeep[k])							if (i_tkeep[k])
+				`SLAVE_ASSUME($stable(i_tdata					`SLAVE_ASSUME($stable(i_tdata
+			// else this is a null (don't care) b				// else this is a null (don't care) b
+			// no data within it						// no data within it
+			//								//
+		end								end
+
+	end endgenerate							end endgenerate
+
+	//						      |		// diego
+							      >		always @(*) assume(i_aresetn == !$initstate);
+							      >
+	// TKEEP == LOW and TSTRB == HIGH is reserved per the		// TKEEP == LOW and TSTRB == HIGH is reserved per the
+	// must not be used						// must not be used
+	always @(posedge i_aclk)					always @(posedge i_aclk)
+	if (i_tvalid)							if (i_tvalid)
+		`SLAVE_ASSUME((~i_tkeep & i_tstrb)==0);				`SLAVE_ASSUME((~i_tkeep & i_tstrb)==0);
+
+	//								//
+	// f_vbytes is the number of valid bytes contained in		// f_vbytes is the number of valid bytes contained in
+	// It is used for counting packet lengths below.		// It is used for counting packet lengths below.
+	always @(*)							always @(*)
+	if (!i_tvalid)							if (!i_tvalid)
+		f_vbytes = 0;							f_vbytes = 0;
+	else begin							else begin
+		f_vbytes = 0;							f_vbytes = 0;
+		for(iB=0; iB < DW/8; iB=iB+1)					for(iB=0; iB < DW/8; iB=iB+1)
+		if (i_tkeep[iB] && i_tstrb[iB])					if (i_tkeep[iB] && i_tstrb[iB])
+			f_vbytes = f_vbytes + 1;					f_vbytes = f_vbytes + 1;
+	end								end
+
+	//								//
+	// f_bytecount is the number of bytes that have taken		// f_bytecount is the number of bytes that have taken
+	// the current packet transmission.  Note that we are		// the current packet transmission.  Note that we are
+	// our location within the stream if the TUSER and TD		// our location within the stream if the TUSER and TD
+	// our (solver chosen) ROUTECHECK.  That way we don't		// our (solver chosen) ROUTECHECK.  That way we don't
+	// *EVERY POSSIBLE* TUSER and TDEST combination.		// *EVERY POSSIBLE* TUSER and TDEST combination.
+	initial	f_bytecount = 0;					initial	f_bytecount = 0;
+	always @(posedge i_aclk)					always @(posedge i_aclk)
+	if (!i_aresetn)							if (!i_aresetn)
+		f_bytecount <= 0;						f_bytecount <= 0;
+	else if (i_tready && i_tvalid && ({ i_tuser, i_tdest 		else if (i_tready && i_tvalid && ({ i_tuser, i_tdest 
+	begin								begin
+		if (i_tlast)							if (i_tlast)
+			f_bytecount <= 0;						f_bytecount <= 0;
+		else								else
+			f_bytecount <= f_bytecount + f_vbytes				f_bytecount <= f_bytecount + f_vbytes
+	end								end
+
+	//								//
+	// Count the number of clock cycles between ready's. 		// Count the number of clock cycles between ready's. 
+	// a bit to insist on an (optional) minimum transfer 		// a bit to insist on an (optional) minimum transfer 
+	initial	f_stall_count = 0;					initial	f_stall_count = 0;
+	always @(posedge i_aclk)					always @(posedge i_aclk)
+	if (!i_aresetn || !i_tvalid || i_tready)			if (!i_aresetn || !i_tvalid || i_tready)
+		f_stall_count <= 0;						f_stall_count <= 0;
+	else if (!(&f_stall_count))					else if (!(&f_stall_count))
+		f_stall_count <= f_stall_count + 1;				f_stall_count <= f_stall_count + 1;
+
+	//								//
+	// F_MAX_PACKET							// F_MAX_PACKET
+	//								//
+	// An optional check, to make certain packets don't e		// An optional check, to make certain packets don't e
+	// length							// length
+	generate if (F_MAX_PACKET > 0)					generate if (F_MAX_PACKET > 0)
+	begin : MAX_PACKET						begin : MAX_PACKET
+
+		always @(*)							always @(*)
+			`SLAVE_ASSUME(f_bytecount + f_vbytes 				`SLAVE_ASSUME(f_bytecount + f_vbytes 
+
+	end endgenerate							end endgenerate
+
+	//								//
+	// F_MIN_PACKET							// F_MIN_PACKET
+	//								//
+	// An optoinal check, forcing a minimum packet length		// An optoinal check, forcing a minimum packet length
+							      >	        reg f_tvalid; //??
+							      >	        reg f_tlast; //??
+	generate if (F_MIN_PACKET > 0)					generate if (F_MIN_PACKET > 0)
+	begin : MIN_PACKET						begin : MIN_PACKET
+
+		always @(*)							always @(*)
+		if (f_tvalid && f_tlast)					if (f_tvalid && f_tlast)
+			`SLAVE_ASSUME(f_bytecount + f_vbytes 				`SLAVE_ASSUME(f_bytecount + f_vbytes 
+
+	end endgenerate							end endgenerate
+
+	//								//
+	// F_MAX_STALL							// F_MAX_STALL
+	//								//
+	// Another optional check, this time insisting that t		// Another optional check, this time insisting that t
+	// only be low for up to F_MAX_STALL clocks.			// only be low for up to F_MAX_STALL clocks.
+	//								//
+	generate if (F_MAX_STALL > 0)					generate if (F_MAX_STALL > 0)
+	begin : MAX_STALL_CHECK						begin : MAX_STALL_CHECK
+
+		always @(*)							always @(*)
+			`SLAVE_ASSERT(stall_count < F_MAX_STA |				`SLAVE_ASSERT(f_stall_count < F_MAX_S
+
+	end endgenerate							end endgenerate
+endmodule							endmodule
+`undef	SLAVE_ASSUME						`undef	SLAVE_ASSUME
+`undef	SLAVE_ASSERT						`undef	SLAVE_ASSERT

@@ -1,0 +1,30 @@
+[tasks]
+provemode
+covermode
+
+[options]
+provemode: mode prove
+covermode: mode cover
+
+[engines]
+provemode: smtbmc boolector
+covermode: smtbmc
+
+[script]
+provemode: read -sv faxis_slave_fixed.sv
+provemode: read -sv amba_axi4_stream_seda_pkg.sv
+provemode: read -sv amba_axi4_stream_seda.sv
+provemode: read -sv amba_axi4_stream_seda_verify.sv
+provemode: prep -flatten -top amba_axi4_stream_seda_verify
+
+covermode: read -formal amba_axi4_stream_seda_pkg.sv
+covermode: read -formal amba_axi4_stream_seda.sv
+covermode: read -formal amba_axi4_stream_seda_verify.sv
+covermode: read -formal faxis_slave_fixed.v
+covermode: prep -flatten -top amba_axi4_stream_seda_verify
+
+[files]
+faxis_slave_fixed.sv
+../../../amba_axi4_stream_seda_pkg.sv
+amba_axi4_stream_seda.sv
+amba_axi4_stream_seda_verify.sv

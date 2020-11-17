@@ -1,0 +1,2294 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\usepackage[scale=0.75]{geometry}
+\usepackage{apacite}
+\date{}
+
+\usepackage{xcolor}
+\usepackage{listings}
+\definecolor{vgreen}{RGB}{104,180,104}
+\definecolor{vblue}{RGB}{49,49,255}
+\definecolor{vorange}{RGB}{255,143,102}
+
+\lstdefinestyle{verilog-style}
+{
+    language=Verilog,
+    basicstyle=\small\ttfamily,
+    keywordstyle=\color{vblue},
+    identifierstyle=\color{black},
+    commentstyle=\color{vgreen},
+    numbers=left,
+    numberstyle=\tiny\color{black},
+    numbersep=10pt,
+    tabsize=8,
+    moredelim=*[s][\colorIndex]{[}{]},
+    literate=*{:}{:}1
+}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Protocol Compliance Verification Using New SEDA AMBA VIP
+\end_layout
+
+\begin_layout Author
+Diego Hdez (diego@symbioticeda.com)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="2" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Revision
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Comment
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Date
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.1
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Initial draft.
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+16/11/20
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset toc
+LatexCommand tableofcontents
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part
+Introduction
+\end_layout
+
+\begin_layout Standard
+The new SEDA AMBA VIP for AXI4-Stream can be used to verify protocol compliance
+ of digital designs that uses the AXI4-Stream bus, as well as to check another
+ Verification IP (VIP) implementations.
+ The goal of this example is to show how to instantiate and use the new
+ SEDA AMBA VIP component to verify and measure improvements over the current
+ solution of the AXI4-Stream that is currently integrated in Symbiotic EDA
+ Suite.
+\end_layout
+
+\begin_layout Standard
+Three problems where found using the new SEDA AMBA VIP in the current AXI4-Strea
+m VIP that comes in the official release of Symbiotic EDA Suite, two of
+ them can be classified as mild, while a third can be classified as severe
+ (failure to detect lost packets during transmission).
+ This demonstrates the value of the new VIP.
+\end_layout
+
+\begin_layout Part
+Technical Specification
+\end_layout
+
+\begin_layout Section
+Architecture
+\end_layout
+
+\begin_layout Standard
+One simple method to verify the current implementation of the AXI4-Stream
+ VIP (named, faxis_slave component) is to connect the new SEDA AMBA VIP
+ in the 
+\begin_inset Quotes eld
+\end_inset
+
+opposite direction
+\begin_inset Quotes erd
+\end_inset
+
+, that is, since the faxis_slave component behaves as sink element (provides
+ constraints or assumptions), this constraint model can be used to restrict
+ the behavior at the input of the new SEDA AMBA VIP connected as source.
+ The source component therefore will validate that the constrains behave
+ as intended or if assumptions are missing (the source can also verify over-cons
+traint by checking the vacuity of the assertions).
+\end_layout
+
+\begin_layout Standard
+The Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Block-diagram-representing"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows a block diagram of the architecture for this demonstration.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename img/architecture.png
+	display false
+	scale 90
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Block diagram representing the architecture of the test.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Block-diagram-representing"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This method can be seen as a way to measure the differences that exist in
+ two formal models, as the constraints of the sink that influences the cone
+ of logic of the assertions of the source will make such assertions to pass
+ trivially (as they are tautologies).
+ The solver will find a path to a counter example in each of the assertions
+ of the source if there exists logical differences such as divergent property
+ density (more variables affecting the COI of the properties in the source
+ compared with the sink) or missing behaviors that are affected by primary
+ inputs, among others.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Environment
+\end_layout
+
+\begin_layout Subsection
+Directory Organisation
+\end_layout
+
+\begin_layout Standard
+The demo files are organised as follows:
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+doc/: 
+\series default
+The source of this document.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+src/:
+\series default
+ The HDL source files such as the wrapper to instantiate both verification
+ components, and the scripts for SymbiYosys.
+ 
+\end_layout
+
+\begin_layout Subsection
+Configuration Parameters
+\end_layout
+
+\begin_layout Standard
+Two HDL models are needed for this test, the faxis_slave component and the
+ amba_axi4_stream_seda VIP as well as a wrapper to connect both VIPs.
+ The following table sumarises the parameter configuration of both components
+ for this specific test.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="9" columns="6">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="middle" width="2.2cm">
+<column alignment="center" valignment="top" width="4cm">
+<column alignment="center" valignment="top" width="2cm">
+<column alignment="center" valignment="middle" width="2.1cm">
+<column alignment="center" valignment="top" width="3cm">
+<column alignment="center" valignment="top" width="1.5cm">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Component
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Parameter
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Value
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Component
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Parameter
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Value
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="3" alignment="left" valignment="middle" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+AMBA AXI4 Stream SEDA
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+AXI_BUS_TYPE
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+1 
+\end_layout
+
+\begin_layout Plain Layout
+
+\size small
+(source)
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="3" alignment="left" valignment="middle" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+faxis_slave
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+F_MAX_
+\end_layout
+
+\begin_layout Plain Layout
+
+\size small
+PACKET
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+GEN_WITNESS
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+0
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+F_MIN_
+\end_layout
+
+\begin_layout Plain Layout
+
+\size small
+PACKET
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+ARM_RECOMMENDED
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+F_MAX_
+\end_layout
+
+\begin_layout Plain Layout
+
+\size small
+STALL
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+MAXWAITS
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+16
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+C_S_AXI_
+\end_layout
+
+\begin_layout Plain Layout
+
+\size small
+DATA_WIDTH
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+8
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+CHECK_SETUP
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+C_S_AXI_
+\end_layout
+
+\begin_layout Plain Layout
+
+\size small
+ID_WIDTH
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+RESET_CHECKS
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+C_S_AXI_
+\end_layout
+
+\begin_layout Plain Layout
+
+\size small
+ADDR_WIDTH
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+4
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+CHECK_XPROP
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+0 (not supported yet by SEDA)
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+C_S_AXI_
+\end_layout
+
+\begin_layout Plain Layout
+
+\size small
+USER_WIDTH
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+0
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multirow="4" alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+VERIFY_VIP
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+1
+\end_layout
+
+\end_inset
+</cell>
+<cell multirow="4" alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+F_
+\end_layout
+
+\begin_layout Plain Layout
+
+\size small
+LGDEPTH
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+32
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+The HDL Wrapper
+\end_layout
+
+\begin_layout Standard
+The Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:The-amba_axi4_stream_seda_verify"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the amba_axi4_stream_seda_verify.sv wrapper that will be used for
+ this example.
+ It instantiates the faxis_slave as a sink element, and the amba_axi4_stream_sed
+a component as a source element.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset include
+LatexCommand lstinputlisting
+filename "../src/amba_axi4_stream_seda_verify.sv"
+lstparams "language=Verilog,basicstyle={\\footnotesize},numbers=left,numberstyle={\\footnotesize},linerange={22-75},style={verilog-style},breaklines=true,frame=single"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The amba_axi4_stream_seda_verify HDL wrapper for this example.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:The-amba_axi4_stream_seda_verify"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+The SBY Script
+\end_layout
+
+\begin_layout Standard
+In the SBY script amba_axi4_stream_seda_verify.sby, two main tasks are defined:
+ 
+\series bold
+provemode
+\series default
+ and 
+\series bold
+covermode
+\series default
+.
+ The 
+\series bold
+provemode
+\series default
+ task uses the smtbmc and boolector engines for K-induction for validity
+ (checking assertions).
+ The 
+\series bold
+covermode 
+\series default
+uses the smtbmc engine for satisfiability (reachability of cover points).
+ The amba_axi4_stream_seda_verify defines some cover scenarios for the VALID/REA
+DY handshaking process and the position bytes and null bytes defined in
+ the AXI4-Stream spec, whose reachability analysis is performed in the 
+\series bold
+covermode
+\series default
+ task.
+ The validity is performed in the 
+\series bold
+provemode
+\series default
+ task.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset include
+LatexCommand lstinputlisting
+filename "../src/amba_axi4_stream_seda_verify.sby"
+lstparams "basicstyle={\\footnotesize},numbers=left,numberstyle={\\footnotesize}"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The amba_axi4_stream_seda_verify.sby script.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Execution
+\end_layout
+
+\begin_layout Standard
+The only requisite for this demonstration is license of Symbiotic EDA Suite
+ version, that is needed to synthesize the SVA assertions of the amba_axi4_strea
+m_seda VIP.
+ The execution of the test is done by executing the command shown in Figure
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Command-to-perform"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset include
+LatexCommand lstinputlisting
+filename "run"
+lstparams "language=bash,basicstyle={\\footnotesize},numbers=left,numberstyle={\\footnotesize},breaklines=true,frame=single"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Command to perform Formal Property Verification with SBY for this example.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Command-to-perform"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For users with no previous experience in Formal Property Verification, Figure
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Debug-flow."
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows a flowchart that can be used as reference to identify and fix issues
+ that could exists.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename img/debug.png
+	display false
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Debug flow.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Debug-flow."
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part
+Results
+\end_layout
+
+\begin_layout Section
+Protocol Violations
+\end_layout
+
+\begin_layout Subsection
+Satisfiability (cover)
+\end_layout
+
+\begin_layout Standard
+All cover scenarios are reachable.
+\end_layout
+
+\begin_layout Subsection
+Validity (assert)
+\end_layout
+
+\begin_layout Standard
+The table below shows some of the protocol violations (missing/not implemented
+ constraints) that the new AMBA SEDA VIP found in the faxis_slave component.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="4" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="6.5cm">
+<column alignment="center" valignment="top" width="4cm">
+<column alignment="center" valignment="top" width="4cm">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Issue
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Reference in the AMBA Specification
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Details
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+\size scriptsize
+\color orange
+Assert failed in
+\end_layout
+
+\begin_layout Plain Layout
+
+\series bold
+\size scriptsize
+\color orange
+assert_SRC_OPTIONAL_TUSER_TIEOFF
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+If TUSER is not present, TUSER must be stable (3.1.4 Optional TID, TDEST,
+ and TUSER, p3-3).
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Not implemented in current VIP.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+\size scriptsize
+\color orange
+Assert failed in
+\end_layout
+
+\begin_layout Plain Layout
+
+\series bold
+\size scriptsize
+\color orange
+assert_SRC_TKEEP_TSTRB_RESERVED
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+A combination of TKEEP LOW and TSTRB HIGH must not be used (2.4.3 TKEEP and
+ TSTRB combinations, p2-9, Table 2-2).
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+The current constraint using i_tvalid as antecedent.
+ Although this is partially correct, the solver found a trace where, after
+ exiting reset, the TKEEP and TSTRB invalid signals propagated.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+\shape italic
+\size scriptsize
+\color red
+Assert failed in
+\end_layout
+
+\begin_layout Plain Layout
+
+\series bold
+\shape italic
+\size scriptsize
+\color red
+assert_SRC_STABLE_TDATA
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Once the master has asserted TVALID, data and control information from master
+ must remain stable [TDATA] (2.2.1, p2-3, Figure 2-1).
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\size small
+Not implemented in current VIP for TDATA.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Issue I: Assert failed in assert_SRC_OPTIONAL_TUSER_TIEOFF
+\end_layout
+
+\begin_layout Subsubsection
+CEX
+\end_layout
+
+\begin_layout Standard
+The Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Not-stable-TUSER"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+ shows the point where the sideband port TUSER is able to change its state
+ despite of not being used (as defined in the test parameter AXI4_STREAM_USER_WI
+DTH = 0).
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename img/optional_tuser.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Not stable TUSER when is not used.
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Not-stable-TUSER"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Description
+\end_layout
+
+\begin_layout Standard
+The faxis_slave does not seems to implement optional AXI4-Stream signal
+ checks that are defined in the spec.
+ This assertion failed because the test defined that TUSER is not used,
+ but faxis_slave does not have those rules implemented such, therefore creating
+ a window for a structural bug to escape.
+ 
+\end_layout
+
+\begin_layout Itemize
+The USER_WIDTH parameter is defined in amba_axi4_stream_seda_pkg.sv as:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset include
+LatexCommand lstinputlisting
+filename "../../../amba_axi4_stream_seda_pkg.sv"
+lstparams "language=bash,basicstyle={\\footnotesize},numbers=left,numberstyle={\\footnotesize},linerange={56-56},style={verilog-style},breaklines=true,frame=single"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Definition of the TUSER width port in the AMBA AXI4-Stream SEDA VIP.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+An propagated to the test amba_axi4_stream_seda_verify.sv wrapper as:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset include
+LatexCommand lstinputlisting
+filename "../src/amba_axi4_stream_seda_verify.sv"
+lstparams "language=Verilog,basicstyle={\\footnotesize},numbers=left,numberstyle={\\footnotesize},linerange={51-51},style={verilog-style},breaklines=true,frame=single"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The TUSER width parameter in the amba_axi4_stream_seda_verify component.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+But the only rule for stable signals defined in faxis_slave.v is this one,
+ that is different from the optional checks:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset include
+LatexCommand lstinputlisting
+filename "../src/faxis_slave.v"
+lstparams "language=Verilog,basicstyle={\\footnotesize},numbers=left,numberstyle={\\footnotesize},linerange={124-137},style={verilog-style},breaklines=true,frame=single"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The TUSER width parameter in the faxis_slave component.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Issue II: Assert failed in assert_SRC_TKEEP_TSTRB_RESERVED
+\end_layout
+
+\begin_layout Subsubsection
+CEX
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename img/tkeep_tstrb_qual.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+A possible scenario where invalid TKEEP/TSTRB combination is present.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Description
+\end_layout
+
+\begin_layout Standard
+The solver found a way to propagate a reserved AXI state due to the antecedent
+ requirement of i_tvalid in the following assertion:
+\end_layout
+
+\begin_layout Itemize
+Invalid combination of TKEEP and TSTRB defined in the faxis_slave:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset include
+LatexCommand lstinputlisting
+filename "../src/faxis_slave.v"
+lstparams "language=Verilog,basicstyle={\\footnotesize},numbers=left,numberstyle={\\footnotesize},linerange={161-165},style={verilog-style},breaklines=true,frame=single"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Antecedent for the rule of TKEEP/TSTRB reserved scenario in the faxis_slave
+ component.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The AMBA AXI4 Stream protocol spec does not explicitly mention that the
+ TKEEP and TSTRB combinations depends on the TVALID/TREADY handshake (it
+ can be argued that is an obvious assumption, but the spec is clear mentioning
+ that behaviors that are not explicitly declared shall not be assumed).
+ For a protocol checker, it is better to enforce that no reserved behaviors
+ occur at any time, regardless of the time window where it appears, and
+ if that time window is a valid data meant to be propagated or not.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Issue III: Assert failed in assert_SRC_STABLE_TDATA
+\end_layout
+
+\begin_layout Subsubsection
+CEX
+\end_layout
+
+\begin_layout Standard
+As can be seen in the CEX of Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:The-source-is"
+plural "false"
+caps "false"
+noprefix "false"
+
+\end_inset
+
+, the optional TDATA is used and it changed the information that the source
+ intended to transmit, but the sink did not capture any of the packets because
+ it was not in a ready state.
+ In other words, a valid packet was dropped.
+ This is an important issue and the faxis_slave must have enforced the check
+ for this data drop packet problem correctly.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename img/tdata_stable.png
+	scale 50
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The source is able to change (drop) a valid packet (TDATA) while the sink
+ is not ready (TREADY).
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:The-source-is"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Description
+\end_layout
+
+\begin_layout Standard
+The faxis_slave 
+\series bold
+does no implement a very critical check
+\series default
+ that is defined from the spec as follows: 
+\begin_inset Quotes eld
+\end_inset
+
+Once the master has asserted TVALID, 
+\uuline on
+the data
+\uuline default
+ or control information from the master must remain unchanged until the
+ slave drives the TREADY signal HIGH, indicating that it can accept the
+ data and control information
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+The current implementation does not check for TDATA when the spec says that
+ both data and control should remain stable:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset include
+LatexCommand lstinputlisting
+filename "../src/faxis_slave.v"
+lstparams "language=Verilog,basicstyle={\\footnotesize},numbers=left,numberstyle={\\footnotesize},linerange={124-137},style={verilog-style},breaklines=true,frame=single"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Data and control information checks in the faxis_slave component.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Improvements
+\end_layout
+
+\begin_layout Standard
+The following patches have been implemented in the files amba_axi4_stream_seda_v
+erify_fixed.sby and faxis_slave_fixed.sv.
+\end_layout
+
+\begin_layout Subsection
+Fix I: Assert failed in assert_SRC_OPTIONAL_TUSER_TIEOFF
+\end_layout
+
+\begin_layout Standard
+The faxis_slave should implement the optional interface checks.
+ For this specific issue the implementation could be as shown below, but
+ is still incomplete since TUSER is not the only optional interface port:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset include
+LatexCommand lstinputlisting
+filename "../src/faxis_slave_fixed.sv"
+lstparams "language=Verilog,basicstyle={\\footnotesize},numbers=left,numberstyle={\\footnotesize},linerange={253-255},style={verilog-style},breaklines=true,frame=single"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The TUSER width parameter in the faxis_slave component.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Fix II: Assert failed in assert_SRC_TKEEP_TSTRB_RESERVED
+\end_layout
+
+\begin_layout Standard
+As discussed in Section 4.2 Issue II: Assert failed in assert_SRC_TKEEP_TSTRB_RES
+ERVED, the rule should not involve any handshake signal:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset include
+LatexCommand lstinputlisting
+filename "../src/faxis_slave_fixed.sv"
+lstparams "language=Verilog,basicstyle={\\footnotesize},numbers=left,numberstyle={\\footnotesize},linerange={166-168},style={verilog-style},breaklines=true,frame=single"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The TUSER width parameter in the faxis_slave component.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Fix III: Assert failed in assert_SRC_STABLE_TDATA
+\end_layout
+
+\begin_layout Standard
+The assertion that manages stability of data and control needs to look for
+ TDATA as well:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset include
+LatexCommand lstinputlisting
+filename "../src/faxis_slave_fixed.sv"
+lstparams "language=Verilog,basicstyle={\\footnotesize},numbers=left,numberstyle={\\footnotesize},linerange={124-138},style={verilog-style},breaklines=true,frame=single"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+The TUSER width parameter in the faxis_slave component.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage newpage
+\end_inset
+
+
+\end_layout
+
+\begin_layout Part*
+Appendix A: Differences of the Local Copy of faxis_slave
+\end_layout
+
+\begin_layout Standard
+The faxis_slave used in this demonstration was obtained from symbiotic-20200902A
+ SEDA release, and it was modified as shown below with the purpose of making
+ it synthesizable, using Verific's feedback:
+\end_layout
+
+\begin_layout Itemize
+Lines 1 to 14, comments of the errors shown by Verific:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename pasted1.png
+	display false
+	scale 30
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Lines 80, 82-83, 85-87, removing non-ansi port declaration: 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename pasted2.png
+	display false
+	scale 30
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Lines 158 to 160, adding $initstate, a Yosys extension to avoid looking
+ traces generated during reset:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename pasted3.png
+	display false
+	scale 30
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Lines 255 to 256, declaring f_tvalid and f_tlast because they had not been
+ declared anywhere:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename pasted4.png
+	display false
+	scale 30
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Itemize
+Line 246, renaming undeclared stall_count to declared f_stall_count:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename pasted5.png
+	display false
+	scale 30
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

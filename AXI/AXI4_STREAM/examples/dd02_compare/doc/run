@@ -1,0 +1,1 @@
+sby -f amba_axi4_stream_seda_verify.sby
