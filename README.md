@@ -38,14 +38,15 @@ This new AMBA VIP aims to improve the quality of the current AXI verification co
 * Optimise the properties for model checking.
 * Be a reference for others to see the power of SVA, and that strong properties are not necessarily complex.
 
-The following sections brielfy describe these points.
+The following sections briefly describe these points.
 
 ---
 
 ### Develop a new IP that fixes important issues that exists in the current implementation with the solely purpose of enhance the Symbiotic EDA Suite VIP catalog
-* Brief description: The AXI VIP under `20200902A/examples/formal-vip` is good to find bugs, but not to prove the absence of them (the VIP istelf has some inconsistencies). It is also incomplete because it does not implement all the rules of the AMBA AXI protocol.
+* Brief description: The AXI VIP under `20200902A/examples/formal-vip` is good to find bugs, but not to prove the absence of them (the VIP itself has some inconsistencies). It is also incomplete because it does not implement all the rules of the AMBA AXI protocol.
 
 The current implementation suffers from some important problems that needs to be fixed. Below are some of those problems found during a quick review[1]:
+
 [1] These _issues_ were found in the licensed components distributed by SEDA Suite, specifically in the version 20200902A, under `examples/formal-vip` directory. 
 
 #### Issues in AXI Lite Sink:
@@ -106,7 +107,7 @@ Under that same reasoning, these three properties pass vacuos as well:
 		assert(!i_axi_arvalid);
 ```
 
-To prove that stateent, the curious reader would create a cover property to check that `f_axi_awr_outstanding`, `f_axi_wr_outstanding` and  `f_axi_rd_outstanding` reaches the value of, in this case, `4'b1110` or `{(F_LGDEPTH-1){1'b1}}, 1'b0}`. And, of course, these cover scenarios are unreachable as well.
+To prove that statement, the curious reader would create a cover property to check that `f_axi_awr_outstanding`, `f_axi_wr_outstanding` and  `f_axi_rd_outstanding` reaches the value of, in this case, `4'b1110` or `{(F_LGDEPTH-1){1'b1}}, 1'b0}`. And, of course, these cover scenarios are unreachable as well.
 
 * For example, the reachability analysis for `f_axi_awr_outstanding` covering the precondition (inserted in line 547):
 ```verilog
