@@ -148,7 +148,7 @@ Some of the issues that affects the current `AXI4-Stream` implementation in `fax
 * Weak implementation of the rules for reserved behaviors of TKEEP/TSTRB.
 * Packet lost due incomplete implementation of the AMBA AXI4-Stream spec, regarding data and control information.
 
-A document that describes these problems in more detail can be found [here](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/blob/main/AXI/AXI4_STREAM/examples/dd02_compare/dd02_compare.pdf]).
+A document that describes these problems in more detail can be found [here](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/blob/main/AXI/AXI4_STREAM/examples/dd02_compare/dd02_compare.pdf).
 
 ---
 
