@@ -52,7 +52,7 @@ The current implementation suffers from some important problems that needs to be
 #### Issues in AXI Lite Sink:
 * Test details:
 * **Directory of the VIP**: `20200902A/examples/formal-vip/axi-lite`
-* **What design**: `demoaxi (demoaxi.sby`
+* **Which design**: `demoaxi (demoaxi.sby`
 
 The `Xilinx's extensions` in the `faxil_slave.v` suffer from unreachability in one of the constraints. 
 In the excerpt below from `faxil_slave.v` (lines 478 to 482), the precondition of the `assumption` that restricts `i_axi_wvalid` *is unreachable*.
@@ -128,7 +128,7 @@ This implementation has not been reviewed yet. But for practical purposes it can
 #### Issues in the AXI4-Stream Sink:
 * Test details:
 * **Directory of the VIP**: `20200902A/examples/formal-vip/axi-lite`
-* **What design**: `$THIS_REPO/AXI/AXI4_STREAM/examples/dd02_compare/`
+* **Which design**: `$THIS_REPO/AXI/AXI4_STREAM/examples/dd02_compare/`
 
 Some of the issues that affects the current `AXI4-Stream` implementation in `faxis_slave.v` are:
 * Missing checks for optional TDATA.
