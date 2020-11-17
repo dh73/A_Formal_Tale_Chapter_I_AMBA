@@ -4,6 +4,8 @@ Beware: This repository is still in beta version
 ---
 
 ## The beginning
+<details><summary>A little (and bad) story that you can read if you have free time.</summary>
+<p>
 There was once a company that developed an open-standard for on-chip interconnect specification and management of functional blocks in a thing called SoC (System On Chip). They named it AMBA (for Advanced Microcontroller Bus Architecture), and although its name suggests that it was created for microcontrollers, thanks to the urgency of some people to create increasingly complex systems to be able to send more and more rare images which they call memes, to strangers, this standard became very popular in a short time.
 
 Given the complexity of the systems where the AMBA bus was used, the standard was forced to evolve to better adapt to the requirements of high frequency, high performance, and so on. An improved standard emerged and was named AXI. 
@@ -20,6 +22,8 @@ Some of them did, some others not so much, but meanwhile AXI implementations kee
 
 _This story is terrible, but not as terrible as the ones you could tell me if you don't use formal verification in your designs_.
 
+</p>
+</details>
 ---
 
 
