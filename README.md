@@ -2,32 +2,11 @@
 
 Beware: This repository is still in beta version
 
-* * *
-
-## Table of contents
-   * [A Formal Tale, Chapter I: AMBA](#a-formal-tale-chapter-i-amba)
-      * [Table of contents](#table-of-contents)
-      * [The beginning](#the-beginning)
-      * [New SEDA AMBA Formal VIP](#new-seda-amba-formal-vip)
-      * [Motivation](#motivation)
-         * [Develop a new IP that fixes important issues that exists in the current implementation with the solely purpose of enhance the Symbiotic EDA Suite VIP catalog](#develop-a-new-ip-that-fixes-important-issues-that-exists-in-the-current-implementation-with-the-solely-purpose-of-enhance-the-symbiotic-eda-suite-vip-catalog)
-            * [Issues in AXI4 Lite Sink:](#issues-in-axi4-lite-sink)
-            * [Issues in AXI4 Lite Source:](#issues-in-axi4-lite-source)
-            * [Issues in AXI4 Full Source:](#issues-in-axi4-full-source)
-               * [Unreachable constraints](#unreachable-constraints)
-               * [Vacuous properties](#vacuous-properties)
-            * [Issues in the AXI4 Stream Sink:](#issues-in-the-axi4-stream-sink)
-         * [Better organisation of the code](#better-organisation-of-the-code)
-         * [Improve debuggability](#improve-debuggability)
-         * [Improve documentation](#improve-documentation)
-         * [Optimise the properties for model checking.](#optimise-the-properties-for-model-checking)
-         * [Be used as reference for others to see the power of SVA](#be-used-as-reference-for-others-to-see-the-power-of-sva)
-
 ---
 
 ## The beginning
 
-<details open="open"><summary>A little (and bad) story that you can read if you have free time.</summary>
+<details><summary>A little (and bad) story that you can read if you have free time.</summary>
 
 There was once a company that developed an open-standard for on-chip interconnect specification and management of functional blocks in a thing called SoC (System On Chip). They named it AMBA (for Advanced Microcontroller Bus Architecture), and although its name suggests that it was created for microcontrollers, thanks to the urgency of some people to create increasingly complex systems to be able to send more and more rare images which they call memes, to strangers, this standard became very popular in a short time.
 
@@ -47,7 +26,30 @@ Some of them did, some others not so much, but meanwhile AXI implementations kee
 
 </details>
 
+
 * * *
+
+## Table of contents
+   * [A Formal Tale, Chapter I: AMBA](#a-formal-tale-chapter-i-amba)
+      * [Table of contents](#table-of-contents)
+      * [The beginning](#the-beginning)
+      * [New SEDA AMBA Formal VIP](#new-seda-amba-formal-vip)
+      * [Motivation](#motivation)
+         * [Develop a new IP that fixes important issues that exists in the current implementation with the solely purpose of enhance the Symbiotic EDA Suite VIP catalog](#develop-a-new-ip-that-fixes-important-issues-that-exists-in-the-current-implementation-with-the-solely-purpose-of-enhance-the-symbiotic-eda-suite-vip-catalog)
+            * [Issues in AXI4 Lite Sink](#issues-in-axi4-lite-sink)
+            * [Issues in AXI4 Lite Source](#issues-in-axi4-lite-source)
+            * [Issues in AXI4 Full Source](#issues-in-axi4-full-source)
+               * [Unreachable constraints](#unreachable-constraints)
+               * [Vacuous properties](#vacuous-properties)
+            * [Issues in the AXI4 Stream Sink](#issues-in-the-axi4-stream-sink)
+         * [Better organisation of the code](#better-organisation-of-the-code)
+         * [Improve debuggability](#improve-debuggability)
+         * [Improve documentation](#improve-documentation)
+         * [Optimise the properties for model checking.](#optimise-the-properties-for-model-checking)
+         * [Be used as reference for others to see the power of SVA](#be-used-as-reference-for-others-to-see-the-power-of-sva)
+
+---
+
 
 ## New SEDA AMBA Formal VIP
 * [AXI4 Stream](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_STREAM)
@@ -81,7 +83,7 @@ The current implementation suffers from some important problems that needs to be
 
 \[1\] These *issues* were found in the licensed components distributed by SEDA Suite, specifically in the version 20200902A, under `examples/formal-vip` directory.
 
-#### Issues in AXI4 Lite Sink:
+#### Issues in AXI4 Lite Sink
 
 - Test details:
 - **Directory of the VIP**: `20200902A/examples/formal-vip/axi-lite`
@@ -150,13 +152,13 @@ Results in :
 
 * * *
 
-#### Issues in AXI4 Lite Source:
+#### Issues in AXI4 Lite Source
 
 This implementation has not been reviewed yet. But for practical purposes it can be assumed that, the same defects that show up in the sink, are found in the source too.
 
 * * *
 
-#### Issues in AXI4 Full Source:
+#### Issues in AXI4 Full Source
 
 - Test details:
 - **Directory of the VIP**: `20200902A/examples/formal-vip/axi`
@@ -235,7 +237,7 @@ And about 9 more that are not listed in the table.
 
 * * *
 
-#### Issues in the AXI4 Stream Sink:
+#### Issues in the AXI4 Stream Sink
 
 - Test details:
 - **Directory of the VIP**: `20200902A/examples/formal-vip/axi-lite`
