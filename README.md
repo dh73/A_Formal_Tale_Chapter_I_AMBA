@@ -24,19 +24,120 @@ _This story is terrible, but not as terrible as the ones you could tell me if yo
 
 </p>
 </details>
+
 ---
 
 
 ## Motivation
-This new AMBA VIP aims to cover the following gaps:
+This new AMBA VIP aims to improve the quality of the current AXI verification components that are distributed as part of Symbiotic EDA Suite, by working on these areas:
+
+* Develop a new IP that fixes important issues that exists in the current implementation with the solely purpose of enhance the Symbiotic EDA Suite VIP catalog.
 * Better organisation of the code.
 * Improve debuggability.
 * Improve documentation.
-* Fix important issues that exists in the current implementation.
 * Optimise the properties for model checking.
 * Be a reference for others to see the power of SVA, and that strong properties are not necessarily complex.
 
+The following sections brielfy describe these points.
+
 ---
+
+### Develop a new IP that fixes important issues that exists in the current implementation with the solely purpose of enhance the Symbiotic EDA Suite VIP catalog
+* Brief description: The AXI VIP under `20200902A/examples/formal-vip` is good to find bugs, but not to prove the absence of them (the VIP istelf has some inconsistencies). It is also incomplete because it does not implement all the rules of the AMBA AXI protocol.
+
+The current implementation suffers from some important problems that needs to be fixed. Below are some of those problems found during a quick review[1]:
+[1] These _issues_ were found in the licensed components distributed by SEDA Suite, specifically in the version 20200902A, under `examples/formal-vip` directory. 
+
+#### Issues in AXI Lite Sink:
+* Test details:
+* **Directory of the VIP**: `20200902A/examples/formal-vip/axi-lite`
+* **What design**: `demoaxi (demoaxi.sby`
+
+The `Xilinx's extensions` in the `faxil_slave.v` suffer from unreachability in one of the constraints. 
+In the excerpt below from `faxil_slave.v` (lines 478 to 482), the precondition of the `assumption` that restricts `i_axi_wvalid` *is unreachable*.
+
+```verilog
+		always @(posedge i_clk)
+		if ((i_axi_reset_n)
+				&&(f_axi_awr_outstanding > 1)
+				&&(f_axi_awr_outstanding-1 > f_axi_wr_outstanding))
+			`SLAVE_ASSUME(i_axi_wvalid);
+```
+Why is this important?, because an unreachable constraint create false confidence of behaviors correctly observed in the logic (if such behaviors are influenced by the constraint). But in reality, *a conflict can make some properties to never trigger*, in other words, properties pass because never failed but because they were never tested (vacuity). Is important to resolve any vacuity that might be present.
+
+To prove that this is an unreachable constraint, this cover statement can be used to check the reachability of the antecedent (this is nothing but the same precondition of the assumption, but used in a cover statement instead):
+```verilog
+always @(posedge i_clk)
+                cover ((i_axi_reset_n) && (f_axi_awr_outstanding > 1) && (f_axi_awr_outstanding-1 > f_axi_wr_outstanding));
+```
+This cover is inserted around lines 484 and 485 in the `faxil_slave.v` file. Executing SBY in `prove` mode, gives the following result, proving there is a problem `Unreached cover statement at faxil_slave.v:485.`: 
+
+```bash
+SBY 21:30:19 [demoaxi_cvr] engine_0: ##   0:00:26  Checking cover reachability in step 24..
+SBY 21:30:19 [demoaxi_cvr] engine_0: ##   0:00:26  Checking cover reachability in step 25..
+SBY 21:30:20 [demoaxi_cvr] engine_0: ##   0:00:26  Checking cover reachability in step 26..
+SBY 21:30:20 [demoaxi_cvr] engine_0: ##   0:00:27  Checking cover reachability in step 27..
+SBY 21:30:21 [demoaxi_cvr] engine_0: ##   0:00:28  Checking cover reachability in step 28..
+SBY 21:30:22 [demoaxi_cvr] engine_0: ##   0:00:28  Checking cover reachability in step 29..
+SBY 21:30:22 [demoaxi_cvr] engine_0: ##   0:00:29  Checking cover reachability in step 30..
+SBY 21:30:23 [demoaxi_cvr] engine_0: ##   0:00:30  Checking cover reachability in step 31..
+SBY 21:30:24 [demoaxi_cvr] engine_0: ##   0:00:31  Checking cover reachability in step 32..
+SBY 21:30:25 [demoaxi_cvr] engine_0: ##   0:00:32  Checking cover reachability in step 33..
+SBY 21:30:26 [demoaxi_cvr] engine_0: ##   0:00:33  Checking cover reachability in step 34..
+SBY 21:30:27 [demoaxi_cvr] engine_0: ##   0:00:33  Checking cover reachability in step 35..
+SBY 21:30:28 [demoaxi_cvr] engine_0: ##   0:00:35  Checking cover reachability in step 36..
+SBY 21:30:30 [demoaxi_cvr] engine_0: ##   0:00:36  Checking cover reachability in step 37..
+SBY 21:30:31 [demoaxi_cvr] engine_0: ##   0:00:38  Checking cover reachability in step 38..
+SBY 21:30:33 [demoaxi_cvr] engine_0: ##   0:00:39  Checking cover reachability in step 39..
+SBY 21:30:34 [demoaxi_cvr] engine_0: ##   0:00:41  Unreached cover statement at faxil_slave.v:485.
+```
+
+Under that same reasoning, these three properties pass vacuos as well:
+```verilog
+	// That means that requests need to stop when we're almost full
+	always @(posedge i_clk)
+	if (f_axi_awr_outstanding == { {(F_LGDEPTH-1){1'b1}}, 1'b0} )
+		assert(!i_axi_awvalid);
+	always @(posedge i_clk)
+	if (f_axi_wr_outstanding == { {(F_LGDEPTH-1){1'b1}}, 1'b0} )
+		assert(!i_axi_wvalid);
+	always @(posedge i_clk)
+	if (f_axi_rd_outstanding == { {(F_LGDEPTH-1){1'b1}}, 1'b0} )
+		assert(!i_axi_arvalid);
+```
+
+To prove that stateent, the curious reader would create a cover property to check that `f_axi_awr_outstanding`, `f_axi_wr_outstanding` and  `f_axi_rd_outstanding` reaches the value of, in this case, `4'b1110` or `{(F_LGDEPTH-1){1'b1}}, 1'b0}`. And, of course, these cover scenarios are unreachable as well.
+
+* For example, the reachability analysis for `f_axi_awr_outstanding` covering the precondition (inserted in line 547):
+```verilog
+always @(posedge i_clk) cover (f_axi_awr_outstanding == { {(F_LGDEPTH-1){1'b1}}, 1'b0} );
+```
+Results in :
+```bash
+0:00:38  Unreached cover statement at faxil_slave.v:547.
+```
+
+---
+
+#### Issues in AXI Lite Source:
+This implementation has not been reviewed yet. But for practical purposes it can be assumed that, the same defects that show up in the sink, are found in the source too.
+
+---
+
+#### Issues in the AXI4-Stream Sink:
+* Test details:
+* **Directory of the VIP**: `20200902A/examples/formal-vip/axi-lite`
+* **What design**: `$THIS_REPO/AXI/AXI4_STREAM/examples/dd02_compare/`
+
+Some of the issues that affects the current `AXI4-Stream` implementation in `faxis_slave.v` are:
+* Missing checks for optional TDATA.
+* Weak implementation of the rules for reserved behaviors of TKEEP/TSTRB.
+* Packet lost due incomplete implementation of the AMBA AXI4-Stream spec, regarding data and control information.
+
+A document that describes these problems in more detail can be found [here](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/blob/main/AXI/AXI4_STREAM/examples/dd02_compare/dd02_compare.pdf).
+
+---
+
 
 ### Better organisation of the code
 The new implementation used the SVA `property` ... `endproperty` constructs to define the rules that are to be proven, and a link to the specification where said behavior is mentioned, as shown in the excerpt below:
@@ -81,80 +182,6 @@ There will be an user guide and a set of examples so the user can start real qui
 
 ---
 
-### Fix important issues that exists in the current implementation
-The current implementation suffers from some important problems that needs to be fixed. Below are some of those found during a quick review:
-
-#### Issues in AXI Lite Sink:
-The `Xilinx's extensions` in the `faxil_slave.v` suffer from a conflict in one of the constraints. 
-In the excerpt below (lines 478 to 482), the precondition of the `assumption` that restricts `i_axi_wvalid` is unreachable.
-
-```verilog
-		always @(posedge i_clk)
-		if ((i_axi_reset_n)
-				&&(f_axi_awr_outstanding > 1)
-				&&(f_axi_awr_outstanding-1 > f_axi_wr_outstanding))
-			`SLAVE_ASSUME(i_axi_wvalid);
-```
-Why is this important?, because a conflicting constraint create false confidence of behaviors correctly observed in the logic. But in reality, *a conflict can make some properties to never trigger*. This is a vacuous property and is important to resolve such vacuity.
-
-To prove that this is a constraint with conflict, this cover statement can be used to check the unreachability of it (this is nothing but the same precondition of the assumption, but used in a cover statement instead):
-```verilog
-always @(posedge i_clk)
-                cover ((i_axi_reset_n) && (f_axi_awr_outstanding > 1) && (f_axi_awr_outstanding-1 > f_axi_wr_outstanding));
-```
-This cover is inserted around lines 484 and 485 in the `faxil_slave.v` file. Executing SBY in `prove` mode, gives the following result, proving there is a problem:
-```bash
-SBY 21:30:19 [demoaxi_cvr] engine_0: ##   0:00:26  Checking cover reachability in step 24..
-SBY 21:30:19 [demoaxi_cvr] engine_0: ##   0:00:26  Checking cover reachability in step 25..
-SBY 21:30:20 [demoaxi_cvr] engine_0: ##   0:00:26  Checking cover reachability in step 26..
-SBY 21:30:20 [demoaxi_cvr] engine_0: ##   0:00:27  Checking cover reachability in step 27..
-SBY 21:30:21 [demoaxi_cvr] engine_0: ##   0:00:28  Checking cover reachability in step 28..
-SBY 21:30:22 [demoaxi_cvr] engine_0: ##   0:00:28  Checking cover reachability in step 29..
-SBY 21:30:22 [demoaxi_cvr] engine_0: ##   0:00:29  Checking cover reachability in step 30..
-SBY 21:30:23 [demoaxi_cvr] engine_0: ##   0:00:30  Checking cover reachability in step 31..
-SBY 21:30:24 [demoaxi_cvr] engine_0: ##   0:00:31  Checking cover reachability in step 32..
-SBY 21:30:25 [demoaxi_cvr] engine_0: ##   0:00:32  Checking cover reachability in step 33..
-SBY 21:30:26 [demoaxi_cvr] engine_0: ##   0:00:33  Checking cover reachability in step 34..
-SBY 21:30:27 [demoaxi_cvr] engine_0: ##   0:00:33  Checking cover reachability in step 35..
-SBY 21:30:28 [demoaxi_cvr] engine_0: ##   0:00:35  Checking cover reachability in step 36..
-SBY 21:30:30 [demoaxi_cvr] engine_0: ##   0:00:36  Checking cover reachability in step 37..
-SBY 21:30:31 [demoaxi_cvr] engine_0: ##   0:00:38  Checking cover reachability in step 38..
-SBY 21:30:33 [demoaxi_cvr] engine_0: ##   0:00:39  Checking cover reachability in step 39..
-SBY 21:30:34 [demoaxi_cvr] engine_0: ##   0:00:41  Unreached cover statement at faxil_slave.v:485.
-```
-
-Derived from the scenario mentioned above, these three properties pass vacuos as well:
-```verilog
-	// That means that requests need to stop when we're almost full
-	always @(posedge i_clk)
-	if (f_axi_awr_outstanding == { {(F_LGDEPTH-1){1'b1}}, 1'b0} )
-		assert(!i_axi_awvalid);
-	always @(posedge i_clk)
-	if (f_axi_wr_outstanding == { {(F_LGDEPTH-1){1'b1}}, 1'b0} )
-		assert(!i_axi_wvalid);
-	always @(posedge i_clk)
-	if (f_axi_rd_outstanding == { {(F_LGDEPTH-1){1'b1}}, 1'b0} )
-		assert(!i_axi_arvalid);
-```
-
-The curious reader would create a cover property to check that `f_axi_awr_outstanding`, `f_axi_wr_outstanding` and  `f_axi_rd_outstanding` reaches the value of, in this case, `4'b1110` or `{(F_LGDEPTH-1){1'b1}}, 1'b0}`. And, of course, these cover scenarios are unreachable as well.
-
----
-
-#### Issues in AXI Lite Source:
-This implementation has not been reviewed yet. But for practical purposes it can be assumed that, the same defects that show up in the sink, are found in the source too.
-
----
-
-#### Issues in the AXI4-Stream Sink:
-Some of the issues that affects the current `AXI4-Stream` implementation in `faxis_slave.v` are:
-* Missing checks for optional ports such as TDATA etc.
-* Weak implementation of the rules for reserved behaviors of TKEEP/TSTRB.
-* Packet lost due incomplete implementation of the AMBA AXI4-Stream spec, regarding data and control information.
-
-A document that describes these problems in more detail can be found [here](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/blob/main/AXI/AXI4_STREAM/examples/dd02_compare/dd02_compare.pdf).
-
----
 
 ### Optimise the properties for model checking.
 The aim is to reduce the size of the new verification IP in terms of variables, so it can be used in large designs. To achieve this, the properties should have only the required variables in the antecedent, and complex behaviors will use auxiliary logic instead of, for example, sequences or any other SVA structure that is not formal friendly.
