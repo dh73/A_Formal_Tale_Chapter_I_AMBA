@@ -109,7 +109,7 @@ always @(posedge i_clk)
                 cover ((i_axi_reset_n) && (f_axi_awr_outstanding > 1) && (f_axi_awr_outstanding-1 > f_axi_wr_outstanding));
 ```
 
-This cover is inserted around lines 484 and 485 in the `faxil_slave.v` file. Executing SBY in `prove` mode, gives the following result, proving there is a problem `Unreached cover statement at faxil_slave.v:485.`:
+This cover is inserted around lines 484 and 485 in the `faxil_slave.v` file. Executing SBY in `cover` mode, gives the following result, proving there is a problem `Unreached cover statement at faxil_slave.v:485.`:
 
 ```bash
 [...]
