@@ -20,7 +20,7 @@ provemode: prep -flatten -top amba_axi4_stream_seda_verify
 covermode: read -formal amba_axi4_stream_seda_pkg.sv
 covermode: read -formal amba_axi4_stream_seda.sv
 covermode: read -formal amba_axi4_stream_seda_verify.sv
-covermode: read -formal faxis_slave_fixed.v
+covermode: read -formal faxis_slave_fixed.sv
 covermode: prep -flatten -top amba_axi4_stream_seda_verify
 
 [files]

@@ -32,7 +32,7 @@
            Section IV : ARM Recommended Rules.
     (	   Section V  : X-Prop Rules.			   )  
      )	   Section VI : Data Signaling rules.		  ( 
-    (	   Section VII: Auxiliar Logic.			   )
+    (	   Section VII: Auxiliary Logic.		   )
      )							  ( 
     (							   )
      )							  (
@@ -101,7 +101,7 @@ module amba_axi4_stream_seda
     * values: 0 (sink) and 1 (source). */
    property using_bus_type_correctly;
       @(posedge ACLK) disable iff (!ARESETn) 
-	!(AXI_BUS_TYPE > 2);
+	!(AXI_BUS_TYPE > 1);
    endproperty // using_bus_type_correctly
    
    
@@ -221,11 +221,11 @@ module amba_axi4_stream_seda
    /* ,         ,                                                     * 
     * |\\\\ ////|  It is recommended that TREADY is asserted within   * 	      
     * | \\\V/// |  MAXWAITS cycles of TVALID being asserted.	      * 
-    * |	 |~~~|	|						      * 
-    * |	 |===|	|						      * 
-    * |	 |A  |	|						      * 
-    * |	 | X |	|						      * 
-    *  \ |  I| /						      * 
+    * |	 |~~~|	|  This is a *potential deadlock check* that can be   *
+    * |	 |===|	|  implemented as well using the strong eventually    *
+    * |	 |A  |	|  operator (if the required bound is too large to be *
+    * |	 | X |	|  formal efficient). Otherwise this bounded property *
+    *  \ |  I| /   works fine.                                        * 
     *	\|===|/							      * 
     *	 '---'							      */ 
    property tready_max_wait;
@@ -435,7 +435,7 @@ module amba_axi4_stream_seda
 
    
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
-    *		 Section VII: Auxiliar Logic.                         *
+    *		 Section VII: Auxiliary Logic.                         *
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
    
    always_ff @(posedge ACLK) begin
@@ -444,7 +444,7 @@ module amba_axi4_stream_seda
    end
 
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
-    *		 Rule check definiton                                 *
+    *		 Rule check definition                                 *
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
    generate
       if (CHECK_SETUP == 1) begin: setup_checks
@@ -453,16 +453,12 @@ module amba_axi4_stream_seda
       end
       
       if (ARM_RECOMMENDED == 1) begin: arm_recommended_properties
-	 if ($bits(TID) > 0) begin: recommended_tid_size
-	    assert_VIP_max_size_of_tid: assert property (max_size_of_tid)
-	      else $error ("Cfg Violation: The recommended max size of TID is 8-bits (Ref: 2.1 Signal List, p2-2, Table 2-1).");
-	 end
+	 assert_VIP_max_size_of_tid: assert property (max_size_of_tid)
+	   else $error ("Cfg Violation: The recommended max size of TID is 8-bits (Ref: 2.1 Signal List, p2-2, Table 2-1).");
 	 
-	 if ($bits(TDEST) > 0) begin: recommended_tdest_size
-	    assert_VIP_max_size_of_tdest: assert property (max_size_of_tdest)
-	      else $error ("Cfg Violation: The recommended max size of TDEST is 4-bits (Ref: 2.1 Signal List, p2-2, Table 2-1).");
-	 end
-
+	 assert_VIP_max_size_of_tdest: assert property (max_size_of_tdest)
+	   else $error ("Cfg Violation: The recommended max size of TDEST is 4-bits (Ref: 2.1 Signal List, p2-2, Table 2-1).");
+	 
 	 if (AXI_BUS_TYPE == 1) begin: recommended_tready_maxwait_src
 	    assume_SRC_TREADY_MAXWAIT: assume property (tready_max_wait)
 	      else $error ("Protocol Violation: TREADY should be asserted within MAXWAITS cycles of TVALID being asserted.");
@@ -472,7 +468,7 @@ module amba_axi4_stream_seda
 	      else $error ("Protocol Violation: TREADY should be asserted within MAXWAITS cycles of TVALID being asserted.");
 	 end
       end // block: arm_recommended_properties
-      
+
       if (AXI_BUS_TYPE == 1) begin: source_checks
 	 assert_SRC_TVALID_until_TREADY: assert property (tvalid_tready_handshake)
 	   else $error ("Protocol Violation: Once TVALID is asserted it must remain asserted until the handshake occurs (2.2.1, p2-3).");
