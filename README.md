@@ -55,6 +55,8 @@ Some of them did, some others not so much, but meanwhile AXI implementations kee
 * [AXI4 Stream](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_STREAM)
 	* [Example 01: Source to sink (self check)](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_STREAM/examples/dd01_self_check)
 	* [Example 02: Verify another VIP (faxis_slave)](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_STREAM/examples/dd02_compare)
+	* [Example 03: AXI4-Stream FIFO from Alex Forencich's](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_STREAM/examples/dd03_axis_fifo)
+	* [Example 04: AXI4-Stream Mat - mul from rahulsridhar5/PLCgroup10](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_STREAM/examples/dd04_mat_mul)
 * AXI4 Lite (still WIP)
 	* [Example 01: Spinal HDL Component](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_LITE_FULL/examples/spinal_axi4_lite)
 
@@ -100,7 +102,7 @@ In the excerpt below from `faxil_slave.v` (lines 478 to 482), the precondition o
             `SLAVE_ASSUME(i_axi_wvalid);
 ```
 
-Why is this important?, because an unreachable constraint create false confidence of behaviors correctly observed in the logic (if such behaviors are influenced by the constraint). But in reality, *a conflict can make some properties to never trigger*, in other words, properties pass because never failed but because they were never tested (vacuity). Is important to resolve any vacuity that might be present.
+Why is this important?, because an unreachable constraint create false confidence of behaviors correctly observed in the logic (if such behaviors are influenced by the constraint). But in reality, *a conflict can make some properties to never trigger*, in other words, properties pass because never failed but because they were never tested (vacuity). Is important to solve any vacuity that might be present.
 
 To prove that this is an unreachable constraint, this cover statement can be used to check the reachability of the antecedent (this is nothing but the same precondition of the assumption, but used in a cover statement instead):
 
@@ -109,7 +111,7 @@ always @(posedge i_clk)
                 cover ((i_axi_reset_n) && (f_axi_awr_outstanding > 1) && (f_axi_awr_outstanding-1 > f_axi_wr_outstanding));
 ```
 
-This cover is inserted around lines 484 and 485 in the `faxil_slave.v` file. Executing SBY in `cover` mode, gives the following result, proving there is a problem `Unreached cover statement at faxil_slave.v:485.`:
+This cover is inserted around lines 484 and 485 in the `faxil_slave.v` file. Executing SBY in `cover` mode, gives the following result proving that there is a problem  (`Unreached cover statement at faxil_slave.v:485`):
 
 ```bash
 [...]
@@ -121,7 +123,7 @@ SBY 21:30:33 [demoaxi_cvr] engine_0: ##   0:00:39  Checking cover reachability i
 SBY 21:30:34 [demoaxi_cvr] engine_0: ##   0:00:41  Unreached cover statement at faxil_slave.v:485.
 ```
 
-Under that same reasoning, these three properties pass vacuos as well:
+Following the same reasoning, these three properties pass vacuos as well:
 
 ```verilog
     // That means that requests need to stop when we're almost full
@@ -136,7 +138,7 @@ Under that same reasoning, these three properties pass vacuos as well:
         assert(!i_axi_arvalid);
 ```
 
-To prove that statement, the curious reader would create a cover property to check that `f_axi_awr_outstanding`, `f_axi_wr_outstanding` and `f_axi_rd_outstanding` reaches the value of, in this case, `4'b1110` or `{(F_LGDEPTH-1){1'b1}}, 1'b0}`. And, of course, these cover scenarios are unreachable as well.
+To prove that statement, the curious reader would create a cover property to check that `f_axi_awr_outstanding`, `f_axi_wr_outstanding` and `f_axi_rd_outstanding` reaches the value of, in this case, `4'b1110` or `{(F_LGDEPTH-1){1'b1}}, 1'b0}`. A failure is expected since these cover scenarios are unreachable as well.
 
 - For example, the reachability analysis for `f_axi_awr_outstanding` covering the precondition (inserted in line 547):
 
@@ -202,13 +204,13 @@ And about 18 more that are not listed in the table.
 
 ##### Vacuous properties
 
-An important amount of vacuous properties where found. For example, the following rule listed in `faxi_master.v`: 742 is vacuous:
+An important amount of vacuous properties were found. For example, the following rule listed in `faxi_master.v`: 742 is vacuous:
 
 ```verilog
 assert(f_axi_rdid_nbursts >= f_axi_rdid_ckign_nbursts+1);
 ```
 
-**Vacuity proof**: 
+###### Vacuity proof
 It does not matter the variables that this property checks, it will pass all the time because it never triggers. For example, changing the property to this obviously wrong values:
 
 ```verilog
