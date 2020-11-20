@@ -448,7 +448,7 @@ module amba_axi4_stream_seda
 
    
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
-    *		 Section VII: Auxiliary Logic.                         *
+    *		 Section VII: Auxiliary Logic.                        *
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
    
    always_ff @(posedge ACLK) begin
