@@ -68,9 +68,9 @@ Some of them did, some others not so much, but meanwhile AXI implementations kee
 ### AXI4 Lite/Full VIP
 * [AXI4 Lite/Full](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_LITE_FULL)
 #### AXI4 Lite/Full VIP Propositions
-	* [AXI4 Lite/Full Propositions](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/blob/main/AXI/AXI4_LITE_FULL/AXI4%20Lite_Full%20Propositions.xlsx)
+* [AXI4 Lite/Full Propositions](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/blob/main/AXI/AXI4_LITE_FULL/AXI4%20Lite_Full%20Propositions.xlsx)
 #### AXI4 Lite/Full VIP Examples
-	* [Example 01: Spinal HDL Component (lite)](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_LITE_FULL/examples/spinal_axi4_lite)
+* [Example 01: Spinal HDL Component (lite)](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_LITE_FULL/examples/spinal_axi4_lite)
 
 ---
 
