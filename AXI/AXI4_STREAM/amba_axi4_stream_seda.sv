@@ -114,7 +114,7 @@ module amba_axi4_stream_seda
     * values: 0 (sink) and 1 (source). */
    property using_bus_type_correctly;
       @(posedge ACLK) disable iff (!ARESETn) 
-	!(AXI4_STREAM_BUS_TYPE > 1);
+	!(BUS_TYPE > 1);
    endproperty // using_bus_type_correctly
    
    
@@ -234,11 +234,11 @@ module amba_axi4_stream_seda
    /* ,         ,                                                     * 
     * |\\\\ ////|  It is recommended that TREADY is asserted within   * 	      
     * | \\\V/// |  MAXWAITS cycles of TVALID being asserted.	      * 
-    * |	 |~~~|	|						      * 
-    * |	 |===|	|						      * 
-    * |	 |A  |	|						      * 
-    * |	 | X |	|						      * 
-    *  \ |  I| /						      * 
+    * |	 |~~~|	|  This is a *potential deadlock check* that can be   *
+    * |	 |===|	|  implemented as well using the strong eventually    *
+    * |	 |A  |	|  operator (if the required bound is too large to be *
+    * |	 | X |	|  formal efficient). Otherwise this bounded property *
+    *  \ |  I| /   works fine.                                        * 
     *	\|===|/							      * 
     *	 '---'							      */ 
    property tready_max_wait;
