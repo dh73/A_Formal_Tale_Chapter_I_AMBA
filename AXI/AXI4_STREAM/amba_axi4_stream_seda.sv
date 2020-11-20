@@ -487,25 +487,25 @@ module amba_axi4_stream_seda
 	   else $error ("Protocol Violation: Once TVALID is asserted it must remain asserted until the handshake occurs (2.2.1, p2-3).");
 	 
 	 assert_SRC_STABLE_TDATA: assert property (tvalid_control(TVALID, TREADY, TDATA))
-	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TDATA] (2.2.1, p2-3, Figure 2-1).");
+	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TDATA] until TREADY is asserted (2.2.1, p2-3, Figure 2-1).");
 	 
 	 assert_SRC_STABLE_TLAST: assert property (tvalid_control(TVALID, TREADY, TLAST))
-	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TLAST] (2.2.1, p2-3, Figure 2-1).");
+	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TLAST] until TREADY is asserted (2.2.1, p2-3, Figure 2-1).");
 	 
 	 assert_SRC_STABLE_TUSER: assert property (tvalid_control(TVALID, TREADY, TUSER))
-	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TUSER] (2.2.1, p2-3, Figure 2-1).");
+	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TUSER] until TREADY is asserted (2.2.1, p2-3, Figure 2-1).");
 	 
 	 assert_SRC_STABLE_TSTRB: assert property (tvalid_control(TVALID, TREADY, TSTRB))
-	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TSTRB] (2.2.1, p2-3, Figure 2-1).");
+	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TSTRB] until TREADY is asserted (2.2.1, p2-3, Figure 2-1).");
 	 
 	 assert_SRC_STABLE_TID:   assert property (tvalid_control(TVALID, TREADY, TID))
-	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TID] (2.2.1, p2-3, Figure 2-1).");
+	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TID] until TREADY is asserted (2.2.1, p2-3, Figure 2-1).");
 	 
 	 assert_SRC_STABLE_TDEST: assert property (tvalid_control(TVALID, TREADY, TDEST))
-	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TDEST] (2.2.1, p2-3, Figure 2-1).");
+	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TDEST] until TREADY is asserted (2.2.1, p2-3, Figure 2-1).");
 	 
 	 assert_SRC_STABLE_TKEEP: assert property (tvalid_control(TVALID, TREADY, TKEEP))
-	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TKEEP] (2.2.1, p2-3, Figure 2-1).");
+	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TKEEP] until TREADY is asserted (2.2.1, p2-3, Figure 2-1).");
 	 
 	 if (OPT_RESET == 1) begin: arst_checks
 	    if (RESET_SIM == 1) begin: arst_4sim
@@ -543,25 +543,25 @@ module amba_axi4_stream_seda
 	   else $error ("Protocol Violation: Once TVALID is asserted it must remain asserted until the handshake occurs (2.2.1, p2-3).");
 	 
 	 assume_SNK_STABLE_TDATA: assume property (tvalid_control(TVALID, TREADY, TDATA))
-	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TDATA] (2.2.1, p2-3, Figure 2-1).");
+	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TDATA] until TREADY is asserted (2.2.1, p2-3, Figure 2-1).");
 	 
 	 assume_SNK_STABLE_TLAST: assume property (tvalid_control(TVALID, TREADY, TLAST))
-           else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TLAST] (2.2.1, p2-3, Figure 2-1).");
+           else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TLAST] until TREADY is asserted (2.2.1, p2-3, Figure 2-1).");
 	 
 	 assume_SNK_STABLE_TUSER: assume property (tvalid_control(TVALID, TREADY, TUSER))
-	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TUSER] (2.2.1, p2-3, Figure 2-1).");
+	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TUSER] until TREADY is asserted (2.2.1, p2-3, Figure 2-1).");
 	 
 	 assume_SNK_STABLE_TSTRB: assume property (tvalid_control(TVALID, TREADY, TSTRB))
-	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TSTRB] (2.2.1, p2-3, Figure 2-1).");
+	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TSTRB] until TREADY is asserted (2.2.1, p2-3, Figure 2-1).");
 	 
 	 assume_SNK_STABLE_TID:   assume property (tvalid_control(TVALID, TREADY, TID))
-	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TID] (2.2.1, p2-3, Figure 2-1).");
+	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TID] until TREADY is asserted (2.2.1, p2-3, Figure 2-1).");
 	 
 	 assume_SNK_STABLE_TDEST: assume property (tvalid_control(TVALID, TREADY, TDEST))
-	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TDEST] (2.2.1, p2-3, Figure 2-1).");
+	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TDEST] until TREADY is asserted (2.2.1, p2-3, Figure 2-1).");
 	 
 	 assume_SNK_STABLE_TKEEP: assume property (tvalid_control(TVALID, TREADY, TKEEP))
-           else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TKEEP] (2.2.1, p2-3, Figure 2-1).");
+           else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TKEEP] until TREADY is asserted (2.2.1, p2-3, Figure 2-1).");
 
 	 if (OPT_RESET == 1) begin: arst_checks
 	    if (RESET_SIM == 1) begin: arst_4sim
