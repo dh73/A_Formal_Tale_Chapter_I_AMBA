@@ -31,9 +31,14 @@ Some of them did, some others not so much, but meanwhile AXI implementations kee
 
 ## Table of contents
    * [A Formal Tale, Chapter I: AMBA](#a-formal-tale-chapter-i-amba)
-      * [Table of contents](#table-of-contents)
       * [The beginning](#the-beginning)
+      * [Table of contents](#table-of-contents)
       * [New SEDA AMBA Formal VIP](#new-seda-amba-formal-vip)
+         * [AXI4-Stream VIP](#axi4-stream-vip)
+            * [AXI4-Stream VIP Examples](#axi4-stream-vip-examples)
+         * [AXI4 Lite/Full VIP](#axi4-litefull-vip)
+            * [AXI4 Lite/Full VIP Propositions](#axi4-litefull-vip-propositions)
+            * [AXI4 Lite/Full VIP Examples](#axi4-litefull-vip-examples)
       * [Motivation](#motivation)
          * [Develop a new IP that fixes important issues that exists in the current implementation with the solely purpose of enhance the Symbiotic EDA Suite VIP catalog](#develop-a-new-ip-that-fixes-important-issues-that-exists-in-the-current-implementation-with-the-solely-purpose-of-enhance-the-symbiotic-eda-suite-vip-catalog)
             * [Issues in AXI4 Lite Sink](#issues-in-axi4-lite-sink)
@@ -41,6 +46,7 @@ Some of them did, some others not so much, but meanwhile AXI implementations kee
             * [Issues in AXI4 Full Source](#issues-in-axi4-full-source)
                * [Unreachable constraints](#unreachable-constraints)
                * [Vacuous properties](#vacuous-properties)
+                  * [Vacuity proof](#vacuity-proof)
             * [Issues in the AXI4 Stream Sink](#issues-in-the-axi4-stream-sink)
          * [Better organisation of the code](#better-organisation-of-the-code)
          * [Improve debuggability](#improve-debuggability)
@@ -52,13 +58,19 @@ Some of them did, some others not so much, but meanwhile AXI implementations kee
 
 
 ## New SEDA AMBA Formal VIP
+### AXI4-Stream VIP
 * [AXI4 Stream](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_STREAM)
-	* [Example 01: Source to sink (self check)](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_STREAM/examples/dd01_self_check)
-	* [Example 02: Verify another VIP (faxis_slave)](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_STREAM/examples/dd02_compare)
-	* [Example 03: AXI4-Stream FIFO from Alex Forencich's](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_STREAM/examples/dd03_axis_fifo)
-	* [Example 04: AXI4-Stream Mat - mul from rahulsridhar5/PLCgroup10](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_STREAM/examples/dd04_mat_mul)
-* AXI4 Lite (still WIP)
-	* [Example 01: Spinal HDL Component](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_LITE_FULL/examples/spinal_axi4_lite)
+#### AXI4-Stream VIP Examples
+* [Example 01: Source to sink (self check)](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_STREAM/examples/dd01_self_check)
+* [Example 02: Verify another VIP (faxis_slave)](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_STREAM/examples/dd02_compare)
+* [Example 03: AXI4-Stream FIFO from Alex Forencich's](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_STREAM/examples/dd03_axis_fifo)
+* [Example 04: AXI4-Stream Mat - mul from rahulsridhar5/PLCgroup10](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_STREAM/examples/dd04_mat_mul)
+### AXI4 Lite/Full VIP
+* [AXI4 Lite/Full](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_LITE_FULL)
+#### AXI4 Lite/Full VIP Propositions
+	* [AXI4 Lite/Full Propositions](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/blob/main/AXI/AXI4_LITE_FULL/AXI4%20Lite_Full%20Propositions.xlsx)
+#### AXI4 Lite/Full VIP Examples
+	* [Example 01: Spinal HDL Component (lite)](https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/tree/main/AXI/AXI4_LITE_FULL/examples/spinal_axi4_lite)
 
 ---
 

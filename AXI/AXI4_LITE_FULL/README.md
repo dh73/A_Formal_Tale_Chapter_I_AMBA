@@ -19,7 +19,7 @@ The AXI4 Lite/Full will be able to be configured as follows:
 		* Verify transactions.
 		* End-to-end checks.
 
-<img src="https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/blob/main/AXI/AXI4_LITE_FULL/doc/images/modes_operation.png" width="300">
+<img src="https://github.com/dh73/A_Formal_Tale_Chapter_I_AMBA/blob/main/AXI/AXI4_LITE_FULL/doc/images/modes_operation.png" width="600">
 
 ---
 
