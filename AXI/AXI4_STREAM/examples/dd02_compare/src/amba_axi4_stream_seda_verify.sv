@@ -16,63 +16,54 @@
  *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
+// Changelog
+// 20/11/2020: Removed generate block since faxis_master is not provided as
+//             part of the licensed components, therefore I can't select
+//             which component to check.
 `default_nettype none
 import amba_axi4_stream_seda_pkg::*;
 
 module amba_axi4_stream_seda_verify
-  #(parameter AXI_BUS_TYPE    = AXI4_STREAM_AXI_BUS_TYPE, 
-    parameter GEN_WITNESS     = AXI4_STREAM_GEN_WITNESS,
-    parameter ARM_RECOMMENDED = AXI4_STREAM_ARM_RECOMMENDED,
-    parameter MAXWAITS	      = AXI4_STREAM_MAXWAITS,
-    parameter CHECK_SETUP     = AXI4_STREAM_CHECK_SETUP,
-    parameter RESET_CHECKS    = AXI4_STREAM_RESET_CHECKS,
-    parameter CHECK_XPROP     = AXI4_STREAM_CHECK_XPROP,
-    parameter VERIFY_VIP      = 1)
-   (input wire axi_data_t  TDATA,
-    input wire axi_strb_t  TSTRB,
-    input wire axi_keep_t  TKEEP,
-    input wire axi_last_t  TLAST,
-    input wire axi_id_t    TID,
-    input wire axi_dest_t  TDEST,
-    input wire axi_user_t  TUSER,
-    input wire axi_valid_t TVALID,
-    input wire axi_ready_t TREADY,
-    input wire axi_aclk_t  ACLK,
-    input wire axi_arstn_t ARESETn);
+  (input wire axi4s_aclk    ACLK,
+   input wire axi4s_aresetn ARESETn,
+   input wire axi4s_data    TDATA,
+   input wire axi4s_strb    TSTRB,
+   input wire axi4s_keep    TKEEP,
+   input wire axi4s_last    TLAST,
+   input wire axi4s_id      TID,
+   input wire axi4s_dest    TDEST,
+   input wire axi4s_user    TUSER,
+   input wire axi4s_valid   TVALID,
+   input wire axi4s_ready   TREADY);
+ 
+   faxis_slave 
+     #(.F_MAX_PACKET(0),
+       .F_MIN_PACKET(0),
+       .F_MAX_STALL(0),
+       .C_S_AXI_DATA_WIDTH(AXI4_STREAM_DATA_WIDTH_BYTES*8),
+       .C_S_AXI_ID_WIDTH(AXI4_STREAM_ID_WIDTH),
+       .C_S_AXI_ADDR_WIDTH(AXI4_STREAM_DEST_WIDTH), // ???
+       .C_S_AXI_USER_WIDTH(AXI4_STREAM_USER_WIDTH),
+       .F_LGDEPTH(32)) 
+   faxis_slave_top
+     (.i_aclk(ACLK), 
+      .i_aresetn(ARESETn),
+      .i_tvalid(TVALID), 
+      .i_tready(TREADY),
+      .i_tdata(TDATA), 
+      .i_tstrb(TSTRB), 
+      .i_tkeep(TKEEP), 
+      .i_tlast(TLAST), 
+      .i_tid(TID),
+      .i_tdest(TDEST), 
+      .i_tuser(TUSER),
+      .f_bytecount(), // free
+      .f_routecheck()); // free
    
-   generate
-      if (AXI_BUS_TYPE == 0) begin: axis_sink
-	 faxis_slave #(.F_MAX_PACKET(0),
-		       .F_MIN_PACKET(0),
-		       .F_MAX_STALL(0),
-		       .C_S_AXI_DATA_WIDTH(AXI4_STREAM_DATA_WIDTH_BYTES*8),
-		       .C_S_AXI_ID_WIDTH(AXI4_STREAM_ID_WIDTH),
-		       .C_S_AXI_ADDR_WIDTH(AXI4_STREAM_DEST_WIDTH), // ???
-		       .C_S_AXI_USER_WIDTH(AXI4_STREAM_USER_WIDTH),
-		       .F_LGDEPTH(32)) faxis_slave_top
-	 (.i_aclk(ACLK), 
-	  .i_aresetn(ARESETn),
-	  .i_tvalid(TVALID), 
-	  .i_tready(TREADY),
-	  .i_tdata(TDATA), 
-	  .i_tstrb(TSTRB), 
-	  .i_tkeep(TKEEP), 
-	  .i_tlast(TLAST), 
-	  .i_tid(TID),
-	  .i_tdest(TDEST), 
-	  .i_tuser(TUSER),
-	  .f_bytecount(), // free
-	  .f_routecheck()); // free
-	 if (VERIFY_VIP == 1) begin: axis_helper
-	    amba_axi4_stream_seda
-	      #(1,
-		ARM_RECOMMENDED,
-		MAXWAITS,
-		CHECK_SETUP,
-		RESET_CHECKS,
-		CHECK_XPROP) source_checker_helper (.*);
-	 end
-      end // block: axis_sink
-   endgenerate
+   // New Symbiotic EDA VIP
+   amba_axi4_stream_seda
+     #(.BUS_TYPE(1)) 
+   source_checker_helper (.*);
+   
 endmodule // amba_axi4_stream_seda_top
 

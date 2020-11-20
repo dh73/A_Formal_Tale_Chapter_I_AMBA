@@ -49,7 +49,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 //
-//
+// changelog
+// 20/11/2020: dh, Fixed all missing/failing properties
 `default_nettype none
 //
 module	faxis_slave(i_aclk, i_aresetn,
@@ -251,9 +252,10 @@ module	faxis_slave(i_aclk, i_aresetn,
 	end endgenerate
 	
 	// diego's fixes
-	// Issue I: Assert failed in assert_SRC_OPTIONAL_TUSER_TIEOFF (FIX)
-	property_fix_I: `SLAVE_ASSUME property (@(posedge i_aclk) disable iff (!i_aresetn) UW == 0 |-> $stable(i_tuser));
-
+	// Issue I: Assert failed in assert_SRC_OPTIONAL_TUSER_TIEOFF (FIX), for an optimised version see: amba_axi4_stream_seda.sv 
+	property_fix_optional_TDATA_I: `SLAVE_ASSUME property (@(posedge i_aclk) disable iff (!i_aresetn) UW == 0 |-> $stable(i_tuser));
+        property_fix_optional_TDATA_II: `SLAVE_ASSUME property (@(posedge i_aclk) disable iff (!i_aresetn) AW == 0 |-> $stable(i_tdest));
+	property_fix_optional_TDATA_III: `SLAVE_ASSUME property (@(posedge i_aclk) disable iff (!i_aresetn) IDW == 0 |-> $stable(i_tid));
 endmodule
 `undef	SLAVE_ASSUME
 `undef	SLAVE_ASSERT

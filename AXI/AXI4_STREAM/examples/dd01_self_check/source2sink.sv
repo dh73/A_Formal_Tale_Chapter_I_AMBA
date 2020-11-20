@@ -1,30 +1,44 @@
+/*
+ *  AXI Formal Verification IP 2.0.
+ *
+ *  Copyright (C) 2020  Diego Hernandez <diego@symbioticeda.com>
+ *
+ *  Permission to use, copy, modify, and/or distribute this software for any
+ *  purpose with or without fee is hereby granted, provided that the above
+ *  copyright notice and this permission notice appear in all copies.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ *  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ *  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ *  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ *  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ *  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ */
 `default_nettype none
 import amba_axi4_stream_seda_pkg::*;
-typedef enum logic [0:0] {VERIFY_SINK, VERIFY_SOURCE} task_t;
 
-module source2sink #(parameter task_t TASK1    = VERIFY_SOURCE,
-		     parameter task_t TASK2    = VERIFY_SINK,
-		     parameter GEN_WITNESS     = AXI4_STREAM_GEN_WITNESS,
-		     parameter ARM_RECOMMENDED = AXI4_STREAM_ARM_RECOMMENDED,
-		     parameter MAXWAITS	       = AXI4_STREAM_MAXWAITS,
-		     parameter CHECK_SETUP     = AXI4_STREAM_CHECK_SETUP,
-		     parameter RESET_CHECKS    = AXI4_STREAM_RESET_CHECKS,
-		     parameter CHECK_XPROP     = AXI4_STREAM_CHECK_XPROP,
-		     parameter VERIFY_VIP      = 1)
-   (input wire axi_data_t  TDATA,
-    input wire axi_strb_t  TSTRB,
-    input wire axi_keep_t  TKEEP,
-    input wire axi_last_t  TLAST,
-    input wire axi_id_t    TID,
-    input wire axi_dest_t  TDEST,
-    input wire axi_user_t  TUSER,
-    input wire axi_valid_t TVALID,
-    input wire axi_ready_t TREADY,
-    input wire axi_aclk_t  ACLK,
-    input wire axi_arstn_t ARESETn);
+module source2sink
+   (input wire axi4s_aclk    ACLK,
+    input wire axi4s_aresetn ARESETn,
+    input wire axi4s_data    TDATA,
+    input wire axi4s_strb    TSTRB,
+    input wire axi4s_keep    TKEEP,
+    input wire axi4s_last    TLAST,
+    input wire axi4s_id      TID,
+    input wire axi4s_dest    TDEST,
+    input wire axi4s_user    TUSER,
+    input wire axi4s_valid   TVALID,
+    input wire axi4s_ready   TREADY);
+   
+   typedef enum logic [0:0] {VERIFY_SINK, VERIFY_SOURCE} task_t;
+   localparam task_t TASK1     = VERIFY_SOURCE;
+   localparam task_t TASK2     = VERIFY_SINK;
 
-   amba_axi4_stream_seda #(VERIFY_SINK, ARM_RECOMMENDED, MAXWAITS, CHECK_SETUP, RESET_CHECKS, CHECK_XPROP) axis_sink (.*); // Constraints
-   amba_axi4_stream_seda #(VERIFY_SOURCE, ARM_RECOMMENDED, MAXWAITS, CHECK_SETUP, RESET_CHECKS, CHECK_XPROP) axis_source (.*); // Source
+   amba_axi4_stream_seda #(.BUS_TYPE(VERIFY_SINK))   constraints (.*);
+   amba_axi4_stream_seda #(.BUS_TYPE(VERIFY_SOURCE)) source_check (.*);
+   
 endmodule // source2sink
 
 

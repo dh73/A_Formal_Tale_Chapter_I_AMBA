@@ -13,16 +13,19 @@ covermode: smtbmc
 [script]
 provemode: read -sv amba_axi4_stream_seda_pkg.sv
 provemode: read -sv amba_axi4_stream_seda.sv
-provemode: read -sv source2sink.sv
-provemode: prep -flatten -top source2sink
+provemode: read -sv axis_fifo.v
+provemode: read -sv axis_fifo_protocol_check.sv
+provemode: prep -flatten -top axis_fifo
 
 covermode: read -sv amba_axi4_stream_seda_pkg.sv
 covermode: read -sv amba_axi4_stream_seda.sv
-covermode: read -sv source2sink.sv
-covermode: verific -import -autocover source2sink
-covermode: prep -flatten -top source2sink
+covermode: read -sv axis_fifo.v
+covermode: read -sv axis_fifo_protocol_check.sv
+covermode: verific -import -autocover axis_fifo
+covermode: prep -flatten -top axis_fifo
 
 [files]
-../../amba_axi4_stream_seda_pkg.sv
-source2sink.sv
+amba_axi4_stream_seda_pkg.sv
 ../../amba_axi4_stream_seda.sv
+axis_fifo.v
+axis_fifo_protocol_check.sv

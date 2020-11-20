@@ -59,10 +59,10 @@
 package amba_axi4_stream_seda_pkg;
    
    localparam AXI4_STREAM_BUS_TYPE         =  1;
-   localparam AXI4_STREAM_DATA_WIDTH_BYTES =  2; 
-   localparam AXI4_STREAM_DEST_WIDTH       =  0;
-   localparam AXI4_STREAM_ID_WIDTH	   =  0;
-   localparam AXI4_STREAM_USER_WIDTH       =  0;
+   localparam AXI4_STREAM_DATA_WIDTH_BYTES =  1; 
+   localparam AXI4_STREAM_DEST_WIDTH       =  8;
+   localparam AXI4_STREAM_ID_WIDTH	   =  8;
+   localparam AXI4_STREAM_USER_WIDTH       =  1;
    localparam AXI4_STREAM_GEN_WITNESS      =  0; 
    localparam AXI4_STREAM_ARM_RECOMMENDED  =  1;
    localparam AXI4_STREAM_MAXWAITS	   = 16;

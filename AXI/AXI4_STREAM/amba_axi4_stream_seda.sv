@@ -32,7 +32,7 @@
            Section IV : ARM Recommended Rules.
     (	   Section V  : X-Prop Rules.			   )  
      )	   Section VI : Data Signaling rules.		  ( 
-    (	   Section VII: Auxiliar Logic.			   )
+    (	   Section VII: Auxiliary Logic.	           )
      )							  ( 
     (							   )
      )							  (
@@ -46,53 +46,66 @@
  *		 ><><><><><><><><><><><><><><><><><><><><	      */
 /* The Symbiotic EDA AXI Verification IP is configured using
  * the following parameters:
- *       A) AXI_BUS_TYPE: 
+ *       A) BUS_TYPE [default value AXI4_STREAM_BUS_TYPE]: 
  *          When set to 0 acts as sink component.
  *          When set to 1 acts as source component.
- *       B) DATA__WIDTH_BYTES: 
- *          The size of the data bus in BYTES.
- *       C) DEST_WIDTH:
- *          The size of TDEST in BITS.
- *       D) ID_WIDTH:
- *          The size of TID in BITS.
- *       E) USER_WIDTH:
- *          The size of TUSER in BITS.
- *       F) GEN_WITNESS:
- *          Generate witness traces (intended for RTL bringup only).
- *       G) ARM_RECOMMENDED:
- *          Enable recommended TREADY/TVALID MAXWAIT rule.
- *       H) MAXWAITS:
+ *       B) AXI4_STREAM_DATA_WIDTH_BYTES:
+ *          The size of the data bus in BYTES (from the pkg).
+ *       C) AXI4_STREAM_DEST_WIDTH:
+ *          The size of TDEST in BITS (from the pkg).
+ *       D) AXI4_STREAM_ID_WIDTH:
+ *          The size of TID in BITS (from the pkg).
+ *       E) AXI4_STREAM_USER_WIDTH:
+ *          The size of TUSER in BITS (from the pkg).
+ *       F) RTL_FLOW [default value AXI4_STREAM_GEN_WITNESS]:
+ *          Generate witness traces (intended for RTL bring-up only).
+ *       G) ARM_RCMD [default value AXI4_STREAM_ARM_RECOMMENDED]:
+ *          Enable recommended TREADY/TVALID MAXWAIT (deadlock) rule.
+ *       H) MAXWAITS [default value AXI4_STREAM_MAXWAITS]:
  *          Configure max clock cycles within a 
- *          TVALID-TREADY handshake.
- *       I) CHECK_SETUP:
+ *          TVALID-TREADY handshake for potential deadlock check.
+ *       I) OPT_SETUP [default value AXI4_STREAM_CHECK_SETUP]:
  *          Verify simple properties that demonstrate correct
  *          configuration of the AXI VIP.
- *       J) CHECK_XPROP:
+ *       J) OPT_RESET [default value AXI4_STREAM_RESET_CHECKS]:
+ *          Enable/disable ARESETn checks.
+ *          Set this parameter to 0 if the reset port does
+ *          not control the AXI4-Stream interface.
+ *       K) RESET_SIM [default value AXI4_STREAM_RESET_SIM]:
+ *          Most of the properties listed in this VIP have a
+ *          default disable clause (reset state). Setting this
+ *          parameter to 1 enables TVALID check during reset
+ *          in a simulation environment (not formal).
+ *       L) XPROP_EN [default value AXI4_STREAM_CHECK_XPROP]:
  *          Run X-propagation checks with formal, on some
  *          control and data AXI-Stream ports.
  */
 `default_nettype none
-import amba_axi4_stream_seda_pkg::*;
 
-module amba_axi4_stream_seda
-  #(parameter AXI_BUS_TYPE    = AXI4_STREAM_AXI_BUS_TYPE,
-    parameter ARM_RECOMMENDED = AXI4_STREAM_ARM_RECOMMENDED,
-    parameter MAXWAITS	      = AXI4_STREAM_MAXWAITS,
-    parameter CHECK_SETUP     = AXI4_STREAM_CHECK_SETUP,
-    parameter RESET_CHECKS    = AXI4_STREAM_RESET_CHECKS,
-    parameter CHECK_XPROP     = AXI4_STREAM_CHECK_XPROP)
-   (input wire axi_data_t  TDATA,
-    input wire axi_strb_t  TSTRB,
-    input wire axi_keep_t  TKEEP,
-    input wire axi_last_t  TLAST,
-    input wire axi_id_t    TID,
-    input wire axi_dest_t  TDEST,
-    input wire axi_user_t  TUSER,
-    input wire axi_valid_t TVALID,
-    input wire axi_ready_t TREADY,
-    input wire axi_aclk_t  ACLK,
-    input wire axi_arstn_t ARESETn);
-   
+module amba_axi4_stream_seda 
+  import amba_axi4_stream_seda_pkg::*;
+   #(parameter BUS_TYPE  = AXI4_STREAM_BUS_TYPE,
+     parameter RTL_FLOW  = AXI4_STREAM_GEN_WITNESS,
+     parameter ARM_RCMD  = AXI4_STREAM_ARM_RECOMMENDED,
+     parameter MAXWAITS  = AXI4_STREAM_MAXWAITS,
+     parameter OPT_SETUP = AXI4_STREAM_CHECK_SETUP,
+     parameter OPT_RESET = AXI4_STREAM_RESET_CHECKS,
+     parameter RESET_SIM = AXI4_STREAM_RESET_SIM,
+     parameter XPROP_EN  = AXI4_STREAM_CHECK_XPROP)
+   /*		 ><><><><><><><><><><><><><><><><><><><><             *
+    *		 Module ports, datatypes from the VIP pkg.            *
+    *		 ><><><><><><><><><><><><><><><><><><><><	      */
+   (input wire axi4s_aclk    ACLK,
+    input wire axi4s_aresetn ARESETn,
+    input wire axi4s_data    TDATA,
+    input wire axi4s_strb    TSTRB,
+    input wire axi4s_keep    TKEEP,
+    input wire axi4s_last    TLAST,
+    input wire axi4s_id	     TID,
+    input wire axi4s_dest    TDEST,
+    input wire axi4s_user    TUSER,
+    input wire axi4s_valid   TVALID,
+    input wire axi4s_ready   TREADY);
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
     *		 Section II: AXI VIP Configuration Rules.             *
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
@@ -101,7 +114,7 @@ module amba_axi4_stream_seda
     * values: 0 (sink) and 1 (source). */
    property using_bus_type_correctly;
       @(posedge ACLK) disable iff (!ARESETn) 
-	!(AXI_BUS_TYPE > 2);
+	!(AXI4_STREAM_BUS_TYPE > 1);
    endproperty // using_bus_type_correctly
    
    
@@ -435,7 +448,7 @@ module amba_axi4_stream_seda
 
    
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
-    *		 Section VII: Auxiliar Logic.                         *
+    *		 Section VII: Auxiliary Logic.                         *
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
    
    always_ff @(posedge ACLK) begin
@@ -444,26 +457,22 @@ module amba_axi4_stream_seda
    end
 
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
-    *		 Rule check definiton                                 *
+    *		 Rule check definition                                *
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
    generate
-      if (CHECK_SETUP == 1) begin: setup_checks
+      if (OPT_SETUP == 1) begin: setup_checks
 	 assert_VIP_correctly_selecting_source_or_sink: assert property (using_bus_type_correctly)
 	   else $error ("Cfg Violation: SEDA AXI VIP is not configured as sink (0) or source (1).");
       end
       
-      if (ARM_RECOMMENDED == 1) begin: arm_recommended_properties
-	 if ($bits(TID) > 0) begin: recommended_tid_size
-	    assert_VIP_max_size_of_tid: assert property (max_size_of_tid)
-	      else $error ("Cfg Violation: The recommended max size of TID is 8-bits (Ref: 2.1 Signal List, p2-2, Table 2-1).");
-	 end
+      if (ARM_RCMD == 1) begin: arm_recommended_properties
+	 assert_VIP_max_size_of_tid: assert property (max_size_of_tid)
+	   else $error ("Cfg Violation: The recommended max size of TID is 8-bits (Ref: 2.1 Signal List, p2-2, Table 2-1).");
 	 
-	 if ($bits(TDEST) > 0) begin: recommended_tdest_size
-	    assert_VIP_max_size_of_tdest: assert property (max_size_of_tdest)
-	      else $error ("Cfg Violation: The recommended max size of TDEST is 4-bits (Ref: 2.1 Signal List, p2-2, Table 2-1).");
-	 end
-
-	 if (AXI_BUS_TYPE == 1) begin: recommended_tready_maxwait_src
+	 assert_VIP_max_size_of_tdest: assert property (max_size_of_tdest)
+	   else $error ("Cfg Violation: The recommended max size of TDEST is 4-bits (Ref: 2.1 Signal List, p2-2, Table 2-1).");
+	 
+	 if (BUS_TYPE == 1) begin: recommended_tready_maxwait_src
 	    assume_SRC_TREADY_MAXWAIT: assume property (tready_max_wait)
 	      else $error ("Protocol Violation: TREADY should be asserted within MAXWAITS cycles of TVALID being asserted.");
 	 end
@@ -472,8 +481,8 @@ module amba_axi4_stream_seda
 	      else $error ("Protocol Violation: TREADY should be asserted within MAXWAITS cycles of TVALID being asserted.");
 	 end
       end // block: arm_recommended_properties
-      
-      if (AXI_BUS_TYPE == 1) begin: source_checks
+
+      if (BUS_TYPE == 1) begin: source_checks
 	 assert_SRC_TVALID_until_TREADY: assert property (tvalid_tready_handshake)
 	   else $error ("Protocol Violation: Once TVALID is asserted it must remain asserted until the handshake occurs (2.2.1, p2-3).");
 	 
@@ -498,9 +507,11 @@ module amba_axi4_stream_seda
 	 assert_SRC_STABLE_TKEEP: assert property (tvalid_control(TVALID, TREADY, TKEEP))
 	   else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TKEEP] (2.2.1, p2-3, Figure 2-1).");
 	 
-	 if (RESET_CHECKS == 1) begin: arst_checks
-	    assert_SRC_TVALID_RST:   assert property (tvalid_during_reset)
-	      else $error ("Protocol Violation: During reset TVALID must be driven LOW (2.7.2 Reset, p2-11).");
+	 if (OPT_RESET == 1) begin: arst_checks
+	    if (RESET_SIM == 1) begin: arst_4sim
+	       assert_SRC_TVALID_RST:   assert property (tvalid_during_reset)
+		 else $error ("Protocol Violation: During reset TVALID must be driven LOW (2.7.2 Reset, p2-11).");
+	    end
 	    
 	    assert_SRC_EXIT_RESET:   assert property (exit_from_reset)
 	      else $error ("Protocol Violation: TVALID must be low for the first clock edge that ARESETn goes high (2.7.2 Reset, p2-11, Figure 2-4).");
@@ -552,9 +563,11 @@ module amba_axi4_stream_seda
 	 assume_SNK_STABLE_TKEEP: assume property (tvalid_control(TVALID, TREADY, TKEEP))
            else $error ("Protocol Violation: Once the master has asserted TVALID, data and control information from master must remain stable [TKEEP] (2.2.1, p2-3, Figure 2-1).");
 
-	 if (RESET_CHECKS == 1) begin: arst_checks
-	    assume_SNK_TVALID_RST:   assume property (tvalid_during_reset)
-              else $error ("Protocol Violation: During reset TVALID must be driven LOW (2.7.2 Reset, p2-11).");
+	 if (OPT_RESET == 1) begin: arst_checks
+	    if (RESET_SIM == 1) begin: arst_4sim
+	       assume_SNK_TVALID_RST:   assume property (tvalid_during_reset)
+		 else $error ("Protocol Violation: During reset TVALID must be driven LOW (2.7.2 Reset, p2-11).");
+	    end
 	    
 	    assume_SNK_EXIT_RESET:   assume property (exit_from_reset)
               else $error ("Protocol Violation: TVALID must be low for the first clock edge that ARESETn goes high (2.7.2 Reset, p2-11, Figure 2-4).");
@@ -586,8 +599,8 @@ module amba_axi4_stream_seda
    // X-prop checks
    generate
       if (SEDA_ENABLED_XPROP == 1) begin: xprop_app
-	 if (CHECK_XPROP == 1) begin: xprop_checks
-	    if (AXI_BUS_TYPE) begin: x_source_checks
+	 if (XPROP_EN == 1) begin: xprop_checks
+	    if (BUS_TYPE == 1) begin: x_source_checks
 	       xprop_SRC_STABLE_TDATA: assert property (xprop_check(TVALID, TDATA)) 
 		 else $error("Protocol Violation: When TVALID is asserted, a don't care value on TDATA is prohibited (2.2.1, p2-3, Figure 2-1).");
 	       
@@ -659,3 +672,4 @@ module amba_axi4_stream_seda
    cover_NULL_BYTE: cover property (null_byte);
    cover_PACKET_BOUNDARY: cover property (packet_boundary);
 endmodule // amba_axi4_stream_seda
+
