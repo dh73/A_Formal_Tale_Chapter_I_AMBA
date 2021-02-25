@@ -11,21 +11,21 @@ provemode: smtbmc boolector
 covermode: smtbmc
 
 [script]
-provemode: read -sv amba_axi4_stream_seda_pkg.sv
-provemode: read -sv amba_axi4_stream_seda.sv
+provemode: read -sv amba_axi4_stream_pkg.sv
+provemode: read -sv amba_axi4_stream.sv
 provemode: read -sv amba_axi4_stream_seda_verify.sv
 provemode: read -sv faxis_slave.v
 provemode: prep -flatten -top amba_axi4_stream_seda_verify
 
-covermode: read -sv amba_axi4_stream_seda_pkg.sv
-covermode: read -sv amba_axi4_stream_seda.sv
+covermode: read -sv amba_axi4_stream_pkg.sv
+covermode: read -sv amba_axi4_stream.sv
 covermode: read -sv amba_axi4_stream_seda_verify.sv
 covermode: read -sv faxis_slave.v
 covermode: verific -import -autocover amba_axi4_stream_seda_verify
 covermode: prep -flatten -top amba_axi4_stream_seda_verify
 
 [files]
-../../../amba_axi4_stream_seda_pkg.sv
-../../../amba_axi4_stream_seda.sv
+../../../amba_axi4_stream_pkg.sv
+../../../amba_axi4_stream.sv
 amba_axi4_stream_seda_verify.sv
 faxis_slave.v

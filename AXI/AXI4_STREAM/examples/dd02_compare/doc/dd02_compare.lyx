@@ -104,11 +104,11 @@
 \begin_body
 
 \begin_layout Title
-Protocol Compliance Verification Using New SEDA AMBA VIP
+Protocol Compliance Verification Using The AMBA AXI Properties
 \end_layout
 
 \begin_layout Author
-Diego Hdez (diego@symbioticeda.com)
+Diego Hdez (diego@yosyshq.com)
 \end_layout
 
 \begin_layout Standard
@@ -121,7 +121,7 @@ Diego Hdez (diego@symbioticeda.com)
 \begin_layout Standard
 \align center
 \begin_inset Tabular
-<lyxtabular version="3" rows="3" columns="3">
+<lyxtabular version="3" rows="4" columns="3">
 <features tabularvalignment="middle">
 <column alignment="center" valignment="top">
 <column alignment="center" valignment="top">
@@ -191,16 +191,16 @@ Initial draft.
 </cell>
 </row>
 <row>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
-0.1
+0.2
 \end_layout
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
@@ -209,11 +209,40 @@ Updated full working properties
 
 \end_inset
 </cell>
-<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \begin_layout Plain Layout
 20/11/20
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.3
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Minimal edits
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+25/02/21
 \end_layout
 
 \end_inset
@@ -254,20 +283,20 @@ Introduction
 \end_layout
 
 \begin_layout Standard
-The new SEDA AMBA VIP for AXI4-Stream can be used to verify protocol compliance
- of digital designs that uses the AXI4-Stream bus, as well as to check another
- Verification IP (VIP) implementations.
+The new AMBA AXI Properties for AXI4-Stream can be used to verify protocol
+ compliance of digital designs that uses the AXI4-Stream bus, as well as
+ to check another Verification IP (VIP) implementations.
  The goal of this example is to show how to instantiate and use the new
- SEDA AMBA VIP component to verify and measure improvements over the current
- solution of the AXI4-Stream that is currently integrated in Symbiotic EDA
- Suite.
+ AMBA AXI Properties component to verify and measure improvements over the
+ current solution of the AXI4-Stream that is currently integrated in Symbiotic
+ EDA Suite.
 \end_layout
 
 \begin_layout Standard
-Three problems where found using the new SEDA AMBA VIP in the current AXI4-Strea
-m VIP that comes in the official release of Symbiotic EDA Suite, two of
- them can be classified as mild, while a third can be classified as severe
- (failure to detect lost packets during transmission).
+Three problems where found using the new AMBA AXI Properties in the current
+ AXI4-Stream VIP that comes in the official release of Symbiotic EDA Suite,
+ two of them can be classified as mild, while a third can be classified
+ as severe (failure to detect lost packets during transmission).
  This demonstrates the value of the new VIP.
 \end_layout
 
@@ -281,7 +310,7 @@ Architecture
 
 \begin_layout Standard
 One simple method to verify the current implementation of the AXI4-Stream
- VIP (named, faxis_slave component) is to connect the new SEDA AMBA VIP
+ VIP (named, faxis_slave component) is to connect the new AMBA AXI Properties
  in the 
 \begin_inset Quotes eld
 \end_inset
@@ -292,7 +321,7 @@ opposite direction
 
 , that is, since the faxis_slave component behaves as sink element (provides
  constraints or assumptions), this constraint model can be used to restrict
- the behavior at the input of the new SEDA AMBA VIP connected as source.
+ the behavior at the input of the new AMBA AXI Properties connected as source.
  The source component therefore will validate that the constrains behave
  as intended or if assumptions are missing (the source can also verify over-cons
 traint by checking the vacuity of the assertions).
@@ -318,7 +347,7 @@ noprefix "false"
 placement H
 wide false
 sideways false
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \align center
@@ -415,7 +444,7 @@ Configuration Parameters
 
 \begin_layout Standard
 Two HDL models are needed for this test, the faxis_slave component and the
- amba_axi4_stream_seda VIP as well as a wrapper to connect both VIPs.
+ amba_axi4_stream VIP as well as a wrapper to connect both VIPs.
  The following table sumarises the parameter configuration of both components
  for this specific test.
 \end_layout
@@ -506,7 +535,7 @@ Value
 \begin_layout Plain Layout
 
 \size small
-AMBA AXI4 Stream SEDA
+AMBA AXI4 Stream 
 \end_layout
 
 \end_inset
@@ -956,7 +985,7 @@ CHECK_XPROP
 \begin_layout Plain Layout
 
 \size small
-0 (not supported yet by SEDA)
+0 (not supported yet by Tabby CAD)
 \end_layout
 
 \end_inset
@@ -1091,10 +1120,10 @@ noprefix "false"
 
 \end_inset
 
- shows the amba_axi4_stream_seda_verify.sv wrapper that will be used for
- this example.
- It instantiates the faxis_slave as a sink element, and the amba_axi4_stream_sed
-a component as a source element.
+ shows the amba_axi4_stream_verify.sv wrapper that will be used for this
+ example.
+ It instantiates the faxis_slave as a sink element, and the amba_axi4_stream
+ component as a source element.
 \end_layout
 
 \begin_layout Standard
@@ -1108,7 +1137,7 @@ status open
 \begin_layout Plain Layout
 \begin_inset CommandInset include
 LatexCommand lstinputlisting
-filename "../src/amba_axi4_stream_seda_verify.sv"
+filename "/home/diego/Formal_Tale_Chapter_AMBA/AXI/AXI4_STREAM/examples/dd02_compare/src/amba_axi4_stream_seda_verify.sv"
 lstparams "language=Verilog,basicstyle={\\footnotesize},numbers=left,numberstyle={\\footnotesize},linerange={23-75},style={verilog-style},breaklines=true,frame=single"
 
 \end_inset
@@ -1120,7 +1149,7 @@ lstparams "language=Verilog,basicstyle={\\footnotesize},numbers=left,numberstyle
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-The amba_axi4_stream_seda_verify HDL wrapper for this example.
+The amba_axi4_stream_verify HDL wrapper for this example.
  
 \begin_inset CommandInset label
 LatexCommand label
@@ -1150,7 +1179,7 @@ The SBY Script
 \end_layout
 
 \begin_layout Standard
-In the SBY script amba_axi4_stream_seda_verify.sby, two main tasks are defined:
+In the SBY script amba_axi4_stream_verify.sby, two main tasks are defined:
  
 \series bold
 provemode
@@ -1171,9 +1200,9 @@ provemode
 covermode 
 \series default
 uses the smtbmc engine for satisfiability (reachability of cover points).
- The amba_axi4_stream_seda_verify defines some cover scenarios for the VALID/REA
-DY handshaking process and the position bytes and null bytes defined in
- the AXI4-Stream spec, whose reachability analysis is performed in the 
+ The amba_axi4_stream_verify defines some cover scenarios for the VALID/READY
+ handshaking process and the position bytes and null bytes defined in the
+ AXI4-Stream spec, whose reachability analysis is performed in the 
 \series bold
 covermode
 \series default
@@ -1208,7 +1237,7 @@ lstparams "basicstyle={\\footnotesize},numbers=left,numberstyle={\\footnotesize}
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-The amba_axi4_stream_seda_verify.sby script.
+The amba_axi4_stream_verify.sby script.
 \end_layout
 
 \end_inset
@@ -1239,7 +1268,7 @@ Execution
 \begin_layout Standard
 The only requisite for this demonstration is license of Symbiotic EDA Suite
  version, that is needed to synthesize the SVA assertions of the amba_axi4_strea
-m_seda VIP.
+m VIP.
  The execution of the test is done by executing the command shown in Figure
  
 \begin_inset CommandInset ref
@@ -1395,7 +1424,7 @@ Validity (assert)
 
 \begin_layout Standard
 The table below shows some of the protocol violations (missing/not implemented
- constraints) that the new AMBA SEDA VIP found in the faxis_slave component.
+ constraints) that the AMBA VIP found in the faxis_slave component.
 \end_layout
 
 \begin_layout Standard
@@ -1684,7 +1713,7 @@ The faxis_slave does not seems to implement optional AXI4-Stream signal
 \end_layout
 
 \begin_layout Itemize
-The USER_WIDTH parameter is defined in amba_axi4_stream_seda_pkg.sv as:
+The USER_WIDTH parameter is defined in amba_axi4_stream_pkg.sv as:
 \end_layout
 
 \begin_layout Standard
@@ -1698,7 +1727,7 @@ status open
 \begin_layout Plain Layout
 \begin_inset CommandInset include
 LatexCommand lstinputlisting
-filename "../../../amba_axi4_stream_seda_pkg.sv"
+filename "../../../amba_axi4_stream_pkg.sv"
 lstparams "language=bash,basicstyle={\\footnotesize},numbers=left,numberstyle={\\footnotesize},linerange={56-56},style={verilog-style},breaklines=true,frame=single"
 
 \end_inset
@@ -1710,7 +1739,7 @@ lstparams "language=bash,basicstyle={\\footnotesize},numbers=left,numberstyle={\
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-Definition of the TUSER width port in the AMBA AXI4-Stream SEDA VIP.
+Definition of the TUSER width port in the AMBA AXI4-Stream VIP.
 \end_layout
 
 \end_inset
@@ -1724,7 +1753,7 @@ Definition of the TUSER width port in the AMBA AXI4-Stream SEDA VIP.
 \end_layout
 
 \begin_layout Itemize
-An propagated to the test amba_axi4_stream_seda_verify.sv wrapper as:
+An propagated to the test amba_axi4_stream_verify.sv wrapper as:
 \end_layout
 
 \begin_layout Standard
@@ -1750,7 +1779,7 @@ lstparams "language=Verilog,basicstyle={\\footnotesize},numbers=left,numberstyle
 \begin_inset Caption Standard
 
 \begin_layout Plain Layout
-The TUSER width parameter in the amba_axi4_stream_seda_verify component.
+The TUSER width parameter in the amba_axi4_stream_verify component.
 \end_layout
 
 \end_inset
@@ -2080,8 +2109,8 @@ Improvements
 \end_layout
 
 \begin_layout Standard
-The following patches have been implemented in the files amba_axi4_stream_seda_v
-erify_fixed.sby and faxis_slave_fixed.sv.
+The following patches have been implemented in the files amba_axi4_stream_verify
+_fixed.sby and faxis_slave_fixed.sv.
 \end_layout
 
 \begin_layout Subsection

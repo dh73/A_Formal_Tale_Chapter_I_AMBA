@@ -1,7 +1,7 @@
 /*
  *  AXI Formal Verification IP 2.0.
  *
- *  Copyright (C) 2020  Diego Hernandez <diego@symbioticeda.com>
+ *  Copyright (C) 2021  Diego Hernandez <diego@yosyshq.com>
  *
  *  Permission to use, copy, modify, and/or distribute this software for any
  *  purpose with or without fee is hereby granted, provided that the above
@@ -17,7 +17,7 @@
  *
  */
 `default_nettype none
-import amba_axi4_stream_seda_pkg::*;
+import amba_axi4_stream_pkg::*;
 
 module source2sink
    (input wire axi4s_aclk    ACLK,
@@ -36,8 +36,8 @@ module source2sink
    localparam task_t TASK1     = VERIFY_SOURCE;
    localparam task_t TASK2     = VERIFY_SINK;
 
-   amba_axi4_stream_seda #(.BUS_TYPE(VERIFY_SINK))   constraints (.*);
-   amba_axi4_stream_seda #(.BUS_TYPE(VERIFY_SOURCE)) source_check (.*);
+   amba_axi4_stream #(.BUS_TYPE(VERIFY_SINK))   constraints (.*);
+   amba_axi4_stream #(.BUS_TYPE(VERIFY_SOURCE)) source_check (.*);
    
 endmodule // source2sink
 

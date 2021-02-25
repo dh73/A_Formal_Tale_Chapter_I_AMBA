@@ -4,7 +4,7 @@
 `define VERIFY_SOURCE 1
 
 // Sink
-bind mat_mul amba_axi4_stream_seda
+bind mat_mul amba_axi4_stream
   #(.BUS_TYPE(`VERIFY_SINK))
 sink_checker 
   (.ACLK(s00_axi_aclk),
@@ -20,7 +20,7 @@ sink_checker
    .TREADY(s00_axis_tready));
 
 // Source
-bind mat_mul amba_axi4_stream_seda
+bind mat_mul amba_axi4_stream
   #(.BUS_TYPE(`VERIFY_SOURCE))
 source_checker 
   (.ACLK(s00_axi_aclk),

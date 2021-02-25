@@ -1,7 +1,7 @@
 /*
  *  AXI Formal Verification IP 2.0.
  *
- *  Copyright (C) 2020  Diego Hernandez <diego@symbioticeda.com>
+ *  Copyright (C) 2021  Diego Hernandez <diego@yosyshq.com>
  *
  *  Permission to use, copy, modify, and/or distribute this software for any
  *  purpose with or without fee is hereby granted, provided that the above
@@ -21,7 +21,7 @@
 //             part of the licensed components, therefore I can't select
 //             which component to check.
 `default_nettype none
-import amba_axi4_stream_seda_pkg::*;
+import amba_axi4_stream_pkg::*;
 
 module amba_axi4_stream_seda_verify
   (input wire axi4s_aclk    ACLK,
@@ -61,7 +61,7 @@ module amba_axi4_stream_seda_verify
       .f_routecheck()); // free
    
    // New Symbiotic EDA VIP
-   amba_axi4_stream_seda
+   amba_axi4_stream
      #(.BUS_TYPE(1)) 
    source_checker_helper (.*);
    

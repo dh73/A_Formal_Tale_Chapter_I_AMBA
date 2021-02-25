@@ -4,7 +4,7 @@
 `define VERIFY_SOURCE 1
 
 // Sink
-bind axis_fifo amba_axi4_stream_seda
+bind axis_fifo amba_axi4_stream
   #(.BUS_TYPE(`VERIFY_SINK),
     .OPT_RESET(1))
 sink_checker 
@@ -21,7 +21,7 @@ sink_checker
    .TREADY(s_axis_tready));
 
 // Source
-bind axis_fifo amba_axi4_stream_seda
+bind axis_fifo amba_axi4_stream
   #(.BUS_TYPE(`VERIFY_SOURCE),
     .OPT_RESET(1))
 source_checker 

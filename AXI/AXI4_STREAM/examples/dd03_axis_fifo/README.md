@@ -2,7 +2,7 @@
 
 This design is from Alex Forencich’s [repo](https://github.com/alexforencich/verilog-axis/blob/master/rtl/axis_fifo.v).
 
-Issues found by `SEDA AMBA AXI4 Stream Protocol Checker`:
+Issues found by `AMBA AXI4 Stream Protocol Checker`:
 
 Sink:
 

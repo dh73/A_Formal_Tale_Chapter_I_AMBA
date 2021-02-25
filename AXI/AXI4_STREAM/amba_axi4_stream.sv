@@ -1,7 +1,7 @@
 /*
- *  AXI Formal Verification IP 2.0.
+ *  AMBA AXI4 Formal Properties.
  *
- *  Copyright (C) 2020  Diego Hernandez <diego@symbioticeda.com>
+ *  Copyright (C) 2021  Diego Hernandez <diego@yosyshq.com>
  *
  *  Permission to use, copy, modify, and/or distribute this software for any
  *  purpose with or without fee is hereby granted, provided that the above
@@ -44,7 +44,7 @@
 /*		 ><><><><><><><><><><><><><><><><><><><><             *
  *		 Section I: Parameters.                               *
  *		 ><><><><><><><><><><><><><><><><><><><><	      */
-/* The Symbiotic EDA AXI Verification IP is configured using
+/* This AMBA AXI Properties package is configured using
  * the following parameters:
  *       A) BUS_TYPE [default value AXI4_STREAM_BUS_TYPE]: 
  *          When set to 0 acts as sink component.
@@ -82,8 +82,8 @@
  */
 `default_nettype none
 
-module amba_axi4_stream_seda 
-  import amba_axi4_stream_seda_pkg::*;
+module amba_axi4_stream 
+  import amba_axi4_stream_pkg::*;
    #(parameter BUS_TYPE  = AXI4_STREAM_BUS_TYPE,
      parameter RTL_FLOW  = AXI4_STREAM_GEN_WITNESS,
      parameter ARM_RCMD  = AXI4_STREAM_ARM_RECOMMENDED,
@@ -252,7 +252,7 @@ module amba_axi4_stream_seda
    
    /* The following X-prop properties are derived from the rules
     * of 2.2.1 Handshake process (TVALID data/control rules).
-    * NOTE: Symbiotic EDA Suite does not support X-prop at the moment.
+    * NOTE: Tabby CAD does not support X-prop at the moment.
     *       These rules will be disabled until the X-prop app 
     *       is implemented. */
    
@@ -462,7 +462,7 @@ module amba_axi4_stream_seda
    generate
       if (OPT_SETUP == 1) begin: setup_checks
 	 assert_VIP_correctly_selecting_source_or_sink: assert property (using_bus_type_correctly)
-	   else $error ("Cfg Violation: SEDA AXI VIP is not configured as sink (0) or source (1).");
+	   else $error ("Cfg Violation: This AXI VIP is not configured as sink (0) or source (1).");
       end
       
       if (ARM_RCMD == 1) begin: arm_recommended_properties
@@ -598,7 +598,7 @@ module amba_axi4_stream_seda
 
    // X-prop checks
    generate
-      if (SEDA_ENABLED_XPROP == 1) begin: xprop_app
+      if (ENABLED_XPROP == 1) begin: xprop_app
 	 if (XPROP_EN == 1) begin: xprop_checks
 	    if (BUS_TYPE == 1) begin: x_source_checks
 	       xprop_SRC_STABLE_TDATA: assert property (xprop_check(TVALID, TDATA)) 
@@ -671,5 +671,5 @@ module amba_axi4_stream_seda
    cover_POSITION_BYTE: cover property (position_byte);
    cover_NULL_BYTE: cover property (null_byte);
    cover_PACKET_BOUNDARY: cover property (packet_boundary);
-endmodule // amba_axi4_stream_seda
+endmodule // amba_axi4_stream
 

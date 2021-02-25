@@ -1,7 +1,7 @@
 /*
  *  AXI Formal Verification IP 2.0.
  *
- *  Copyright (C) 2020  Diego Hernandez <diego@symbioticeda.com>
+ *  Copyright (C) 2021  Diego Hernandez <diego@yosyshq.com>
  *
  *  Permission to use, copy, modify, and/or distribute this software for any
  *  purpose with or without fee is hereby granted, provided that the above
@@ -16,8 +16,8 @@
  *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
-`ifndef __AMBA_AXI4_STREAM_SEDA_PKG__
- `define __AMBA_AXI4_STREAM_SEDA_PKG__
+`ifndef __AMBA_AXI4_STREAM_PKG__
+ `define __AMBA_AXI4_STREAM_PKG__
 
 /* The Symbiotic EDA AXI Verification IP is configured using
  * the following parameters:
@@ -56,7 +56,7 @@
  *          control and data AXI-Stream ports.
  */
 
-package amba_axi4_stream_seda_pkg;
+package amba_axi4_stream_pkg;
    
    localparam AXI4_STREAM_BUS_TYPE         =  1;
    localparam AXI4_STREAM_DATA_WIDTH_BYTES =  2; 
@@ -70,8 +70,8 @@ package amba_axi4_stream_seda_pkg;
    localparam AXI4_STREAM_RESET_CHECKS     =  1;
    localparam AXI4_STREAM_RESET_SIM        =  0;
    localparam AXI4_STREAM_CHECK_XPROP      =  0;
-   // For X-prop rules (not supported by SEDA yet)
-   localparam SEDA_ENABLED_XPROP = 0;
+   // For X-prop rules (not supported by Tabby CAD yet)
+   localparam ENABLED_XPROP = 0;
    
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
     *		 Port config (not expecting any user edits)           *
@@ -97,6 +97,6 @@ package amba_axi4_stream_seda_pkg;
    typedef logic [ONE_BIT_WIDTH	  : 0] axi4s_valid;
    typedef logic [ONE_BIT_WIDTH	  : 0] axi4s_ready;
    
-endpackage // amba_axi4_stream_seda_pkg
+endpackage // amba_axi4_stream_pkg
 `endif
 

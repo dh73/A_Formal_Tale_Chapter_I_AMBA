@@ -155,9 +155,6 @@ module	faxis_slave(i_aclk, i_aresetn,
 
 	end endgenerate
 
-	// diego
-	always @(*) assume(i_aresetn == !$initstate);
-
 	// TKEEP == LOW and TSTRB == HIGH is reserved per the spec, and
 	// must not be used
 	always @(posedge i_aclk)

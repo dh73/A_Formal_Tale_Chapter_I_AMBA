@@ -11,18 +11,18 @@ provemode: smtbmc
 covermode: smtbmc
 
 [script]
-provemode: read -sv amba_axi4_stream_seda_pkg.sv
-provemode: read -sv amba_axi4_stream_seda.sv
+provemode: read -sv amba_axi4_stream_pkg.sv
+provemode: read -sv amba_axi4_stream.sv
 provemode: read -sv source2sink.sv
 provemode: prep -flatten -top source2sink
 
-covermode: read -sv amba_axi4_stream_seda_pkg.sv
-covermode: read -sv amba_axi4_stream_seda.sv
+covermode: read -sv amba_axi4_stream_pkg.sv
+covermode: read -sv amba_axi4_stream.sv
 covermode: read -sv source2sink.sv
 covermode: verific -import -autocover source2sink
 covermode: prep -flatten -top source2sink
 
 [files]
-../../amba_axi4_stream_seda_pkg.sv
+../../amba_axi4_stream_pkg.sv
 source2sink.sv
-../../amba_axi4_stream_seda.sv
+../../amba_axi4_stream.sv
