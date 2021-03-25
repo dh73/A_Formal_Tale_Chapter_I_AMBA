@@ -1,5 +1,4 @@
-/*
- *  AXI4 Formal Properties.
+/*  AXI4 Formal Properties.
  *  Copyright (C) 2021  Diego Hernandez <diego@yosyshq.com>
  *                                      <dhdezr@fpgaparadox.com>
  *  Permission to use, copy, modify, and/or distribute this software for any
@@ -110,11 +109,23 @@ package amba_axi4_single_interface_requirements;
       ready && valid;
    endproperty // valid_with_ready
 
+   // Deadlock (ARM Recommended)
+   /* ,         ,                                                     *
+    * |\\\\ ////|  It is recommended that READY is asserted within    *
+    * | \\\V/// |  MAXWAITS cycles of VALID being asserted.	      *
+    * |	 |~~~|	|  This is a *potential deadlock check* that can be   *
+    * |	 |===|	|  implemented as well using the strong eventually    *
+    * |	 |A  |	|  operator (if the required bound is too large to be *
+    * |	 | X |	|  formally efficient). Otherwise this bounded        *
+    *  \ |  I| /   property works fine.                               *
+    *	\|===|/							      *
+    *	 '---'							      */
+   property handshake_max_wait(valid, ready, timeout);
+      valid & !ready |-> ##[1:timeout] ready;
+   endproperty // handshake_max_wait
+
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
     *	      Section A3.2.2: Channel signaling requirements          *
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
-
-   
-
 endpackage // amba_axi4_single_interface_requirements
 `endif
