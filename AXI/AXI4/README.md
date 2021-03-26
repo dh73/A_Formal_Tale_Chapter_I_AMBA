@@ -26,4 +26,6 @@ The AXI4 Lite/Full will be able to be configured as follows:
 ## Development Plan
 The file `AXI4 Lite_Full Propositions.xlsx` contains the development plan for this VIP.
 
-
+# Important Note
+The development of this project is still ongoing. **You may find some obvious mistakes, wrong logic, etc. I'm just assembling properties right now.**
+Testing will be perfomed as soon as the properties are assembled. I already have some strong testing in mind.
