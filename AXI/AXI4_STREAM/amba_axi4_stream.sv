@@ -449,12 +449,10 @@ module amba_axi4_stream
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
     *		 Section VII: Auxiliary Logic.                        *
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
-
    always_ff @(posedge ACLK) begin
       if (!ARESETn) first_point <= 1'b1;
       else          first_point <= 1'b0;
    end
-
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
     *		 Rule check definition                                *
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
