@@ -1,5 +1,5 @@
 /*
- *  AXI Formal Verification IP 2.0.
+ *  AMBA AXI4-Stream Formal Properties.
  *
  *  Copyright (C) 2021  Diego Hernandez <diego@yosyshq.com>
  *
@@ -18,8 +18,7 @@
  */
 `default_nettype none
 import amba_axi4_stream_pkg::*;
-
-module source2sink
+module source2sink #(parameter CHECK_TYPE=0) // 0 -> Verify source; 1 -> Verify sink
    (input wire axi4s_aclk    ACLK,
     input wire axi4s_aresetn ARESETn,
     input wire axi4s_data    TDATA,
@@ -31,15 +30,25 @@ module source2sink
     input wire axi4s_user    TUSER,
     input wire axi4s_valid   TVALID,
     input wire axi4s_ready   TREADY);
-   
+
    typedef enum logic [0:0] {VERIFY_SINK, VERIFY_SOURCE} task_t;
    localparam task_t TASK1     = VERIFY_SOURCE;
    localparam task_t TASK2     = VERIFY_SINK;
 
-   amba_axi4_stream #(.BUS_TYPE(VERIFY_SINK))   constraints (.*);
-   amba_axi4_stream #(.BUS_TYPE(VERIFY_SOURCE)) source_check (.*);
-   
+   generate
+      if (CHECK_TYPE==0) begin: src_to_dst
+	 amba_axi4_stream #(.BUS_TYPE(VERIFY_SINK))
+	 constraints(.*);
+	 amba_axi4_stream #(.BUS_TYPE(VERIFY_SOURCE))
+	 source_check(.*);
+      end : src_to_dst
+      else begin : dst_to_src
+	 amba_axi4_stream #(.BUS_TYPE(VERIFY_SOURCE))
+	 constraints(.*);
+	 amba_axi4_stream #(.BUS_TYPE(VERIFY_SINK))
+	 sink_check(.*);
+      end : dst_to_src
+      endgenerate
 endmodule // source2sink
-
 
 
