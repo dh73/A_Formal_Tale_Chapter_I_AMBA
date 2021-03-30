@@ -42,10 +42,10 @@ package amba_axi4_single_interface_requirements;
    /* ,         ,                                                     *
     * |\\\\ ////|  "The source presents the address, data or control  *
     * | \\\V/// |   information [...] and asserts the VALID signal.   *
-    * |	 |~~~|	|   The destination asserts the READY signal [...]    *
-    * |	 |===|	|   and the source must keep its information stable   *
-    * |	 |A  |	|   until the transfer occurs".                       *
-    * |	 | X |	|   Ref: A3.2.1 Handshake process, pA3-39,            *
+    * |	 |~~~|  |   The destination asserts the READY signal [...]    *
+    * |	 |===|  |   and the source must keep its information stable   *
+    * |	 |A  |  |   until the transfer occurs".                       *
+    * |	 | X |  |   Ref: A3.2.1 Handshake process, pA3-39,            *
     *  \ |  I| /    Figure A3-2                                       *
     *   \|===|/							      *
     *    '---'							      */
@@ -92,18 +92,18 @@ package amba_axi4_single_interface_requirements;
     *   \|===|/							      *
     *    '---'							      */
    property ready_before_valid(valid, ready);
-	ready && !valid;
+      ready && !valid;
    endproperty // ready_before_valid
 
    /* ,         ,                                                     *
     * |\\\\ ////|  "Both the source and destination happen to         *
     * | \\\V/// |   indicate [...] that they can transfer the payload *
-    * |	 |~~~|	|   In this case the transfer occurs at the rising    *
+    * |	 |~~~|  |   In this case the transfer occurs at the rising    *
     * |	 |===|	|   clock edge when the assertion of both VALID and   *
     * |	 |A  |	|   READY can be recognized".                         *
     * |	 | X |	|   Ref: A3.2.1 Handshake process, pA3-40,            *
     *  \ |  I| /    Figure A3-4.                                      *
-    *   \|===|/							      *
+    *   \|===|/	   		                                      *
     *    '---'							      */
    property valid_with_ready(valid, ready);
       ready && valid;

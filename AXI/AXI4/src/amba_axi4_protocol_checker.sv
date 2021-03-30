@@ -1,9 +1,9 @@
 `default_nettype none
-typedef enum logic [1:0] {OKAY, EXOKAY, SLVERR, DECERR} responses_t;
 module amba_axi4_protocol_checker #(parameter ADDRESS_WIDTH=32,
-				    parameter DATA_WIDTH=32,
+				    parameter DATA_WIDTH=64,
 				    parameter MAXWAIT=16,
-				    parameter TYPE=0) //0 source, 1 dest, [2 mon, 3 cons]
+				    parameter TYPE=0, //0 source, 1 dest, [2 mon, 3 cons]
+				    localparam STRB_WIDTH=DATA_WIDTH/8)
    (input wire                     ACLK,
     input wire 			   ARESETn,
     // Write Address Channel (AW)
@@ -15,8 +15,8 @@ module amba_axi4_protocol_checker #(parameter ADDRESS_WIDTH=32,
     input wire 			   WVALID,
     input wire 			   WREADY,
     input wire [DATA_WIDTH-1:0]    WDATA,
-    input wire [2:0] 		   WSTRB,
-    // Write Response Channel
+    input wire [STRB_WIDTH-1:0]	   WSTRB,
+    // Write Response Channel (B)
     input wire 			   BVALID,
     input wire 			   BREADY,
     input wire responses_t         BRESP,
@@ -38,6 +38,7 @@ module amba_axi4_protocol_checker #(parameter ADDRESS_WIDTH=32,
    // Write data channel simple properties
    amba_axi4_write_data_channel
      #(.DATA_WIDTH(DATA_WIDTH),
+       .STRB_WIDTH(STRB_WIDTH),
        .MAXWAIT(MAXWAIT),
        .TYPE(TYPE)) W_simple_iface_checks (.*);
    // Write response channel simple properties

@@ -39,32 +39,39 @@ module amba_axi4_read_address_channel #(parameter ADDRESS_WIDTH=32,
    generate
       if (TYPE == 0) begin: source_properties
 	 // Section A3.1.2: Reset
-	 assert_AR_SRC_DST_EXIT_RESET:   assert property (exit_from_reset(ARESETn, first_point, ARVALID))
-	   else $error ("Protocol Violation: ARVALID must be low for the first clock edge after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
+	 ap_AR_SRC_DST_EXIT_RESET: assert property (exit_from_reset(ARESETn, first_point, ARVALID))
+	   else $error ("Violation: ARVALID must be low for the first clock edge",
+			"after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
 	 // Section A3.2.1: Handshake process
-	 assert_AR_SRC_DST_STABLE_ARPROT: assert property (disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARPROT))
-	   else $error ("Protocol Violation: Once the master has asserted ARVALID, data and control information from master must remain stable [ARPROT] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
-	 assert_AR_SRC_DST_STABLE_ARADDR: assert property (disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARADDR))
-	   else $error ("Protocol Violation: Once the master has asserted ARVALID, data and control information from master must remain stable [ARADDR] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
-	 assert_AR_SRC_DST_ARVALID_until_ARREADY: assert property (disable iff (!ARESETn) valid_before_handshake(ARVALID, ARREADY))
-	   else $error ("Protocol Violation: Once ARVALID is asserted it must remain asserted until the handshake occurs  (A3.2.1 Handshake process, pA3-39).");
+	 ap_AR_SRC_DST_STABLE_ARPROT: assert property (disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARPROT))
+	   else $error ("Violation: Once the master has asserted ARVALID, data and control information",
+			"from master must remain stable [ARPROT] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
+	 ap_AR_SRC_DST_STABLE_ARADDR: assert property (disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARADDR))
+	   else $error ("Violation: Once the master has asserted ARVALID, data and control information",
+			"from master must remain stable [ARADDR] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
+	 ap_AR_SRC_DST_ARVALID_until_ARREADY: assert property (disable iff (!ARESETn) valid_before_handshake(ARVALID, ARREADY))
+	   else $error ("Violation: Once ARVALID is asserted it must remain asserted until the handshake",
+			"occurs  (A3.2.1 Handshake process, pA3-39).");
 	 // Disable iff not ARM recommended
-	 assume_AR_SRC_DST_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(ARVALID, ARREADY, MAXWAIT))
-	   else $error ("Protocol Violation: ARREADY should be asserted within MAXWAIT cycles of ARVALID being asserted.");
+	 cp_AR_SRC_DST_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(ARVALID, ARREADY, MAXWAIT))
+	   else $error ("Violation: ARREADY should be asserted within MAXWAIT cycles of ARVALID being asserted (AMBA recommended).");
       end
       else begin: destination_properties
 	 // Section A3.1.2: Reset
-	 assume_AR_DST_SRC_EXIT_RESET:   assume property (exit_from_reset(ARESETn, first_point, ARVALID))
-	   else $error ("Protocol Violation: ARVALID must be low for the first clock edge after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
+	 cp_AR_DST_SRC_EXIT_RESET: assume property (exit_from_reset(ARESETn, first_point, ARVALID))
+	   else $error ("Violation: ARVALID must be low for the first clock edge after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
 	 // Section A3.2.1: Handshake process
-	 assume_AR_DST_SRC_STABLE_AWPROT: assume property (disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARPROT))
-	   else $error ("Protocol Violation: Once the master has asserted ARVALID, data and control information from master must remain stable [ARPROT] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
-	 assume_AR_DST_SRC_STABLE_AWADDR: assume property (disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARADDR))
-	   else $error ("Protocol Violation: Once the master has asserted ARVALID, data and control information from master must remain stable [ARADDR] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
-	 assume_AR_DST_SRC_AWVALID_until_AWREADY: assume property (disable iff (!ARESETn) valid_before_handshake(ARVALID, ARREADY))
-	   else $error ("Protocol Violation: Once ARVALID is asserted it must remain asserted until the handshake occurs  (A3.2.1 Handshake process, pA3-39).");
-	 assert_AR_DST_SRC_READY_MAXWAIT: assert property (disable iff (!ARESETn) handshake_max_wait(ARVALID, ARREADY, MAXWAIT))
-	   else $error ("Protocol Violation: ARREADY should be asserted within MAXWAIT cycles of ARVALID being asserted.");
+	 cp_AR_DST_SRC_STABLE_AWPROT: assume property (disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARPROT))
+	   else $error ("Violation: Once the master has asserted ARVALID, data and control information",
+			"from master must remain stable [ARPROT] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
+	 cp_AR_DST_SRC_STABLE_AWADDR: assume property (disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARADDR))
+	   else $error ("Violation: Once the master has asserted ARVALID, data and control information",
+			"from master must remain stable [ARADDR] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
+	 cp_AR_DST_SRC_AWVALID_until_AWREADY: assume property (disable iff (!ARESETn) valid_before_handshake(ARVALID, ARREADY))
+	   else $error ("Violation: Once ARVALID is asserted it must remain asserted until the handshake",
+			"occurs  (A3.2.1 Handshake process, pA3-39).");
+	 ap_AR_DST_SRC_READY_MAXWAIT: assert property (disable iff (!ARESETn) handshake_max_wait(ARVALID, ARREADY, MAXWAIT))
+	   else $error ("Violation: ARREADY should be asserted within MAXWAIT cycles of ARVALID being asserted (AMBA recommended.");
       end
    endgenerate
 endmodule // amba_axi4_read_address_channel

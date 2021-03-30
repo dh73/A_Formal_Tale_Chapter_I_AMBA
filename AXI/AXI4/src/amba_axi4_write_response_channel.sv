@@ -38,29 +38,35 @@ module amba_axi4_write_response_channel #(parameter MAXWAIT = 16,
    generate
       if (TYPE == 0) begin: source_properties
 	 // Section A3.1.2: Reset
-	 assert_B_SRC_DST_EXIT_RESET:   assert property (exit_from_reset(ARESETn, first_point, BVALID))
-	   else $error ("Protocol Violation: BVALID must be low for the first clock edge after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
+	 ap_B_SRC_DST_EXIT_RESET: assert property (exit_from_reset(ARESETn, first_point, BVALID))
+	   else $error ("Violation: BVALID must be low for the first clock edge",
+			"after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
 	 // Section A3.2.1: Handshake process
-	 assert_B_SRC_DST_STABLE_BRESP: assert property (disable iff (!ARESETn) stable_before_handshake(BVALID, BREADY, BRESP))
-	   else $error ("Protocol Violation: Once the master has asserted BVALID, data and control information from master must remain stable [BRESP] until BREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
-	 assert_B_SRC_DST_BVALID_until_BREADY: assert property (disable iff (!ARESETn) valid_before_handshake(BVALID, BREADY))
-	   else $error ("Protocol Violation: Once BVALID is asserted it must remain asserted until the handshake occurs (A3.2.1 Handshake process, pA3-39).");
+	 ap_B_SRC_DST_STABLE_BRESP: assert property (disable iff (!ARESETn) stable_before_handshake(BVALID, BREADY, BRESP))
+	   else $error ("Violation: Once the master has asserted BVALID, data and control information",
+			"from master must remain stable [BRESP] until BREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
+	 ap_B_SRC_DST_BVALID_until_BREADY: assert property (disable iff (!ARESETn) valid_before_handshake(BVALID, BREADY))
+	   else $error ("Violation: Once BVALID is asserted it must remain asserted until the handshake",
+			"occurs (A3.2.1 Handshake process, pA3-39).");
 	 // Disable iff not ARM recommended
-	 assume_B_SRC_DST_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(BVALID, BREADY, MAXWAIT))
-	   else $error ("Protocol Violation: BREADY should be asserted within MAXWAIT cycles of BVALID being asserted.");
+	 cp_B_SRC_DST_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(BVALID, BREADY, MAXWAIT))
+	   else $error ("Violation: BREADY should be asserted within MAXWAIT cycles of BVALID being asserted (AMBA Recommended).");
       end
       else begin: destination_properties
 	 // Section A3.1.2: Reset
-	 assume_B_DST_SRC_EXIT_RESET:   assume property (exit_from_reset(ARESETn, first_point, BVALID))
-	   else $error ("Protocol Violation: BVALID must be low for the first clock edge after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
+	 cp_B_DST_SRC_EXIT_RESET:   assume property (exit_from_reset(ARESETn, first_point, BVALID))
+	   else $error ("Violation: BVALID must be low for the first clock edge",
+			"after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
 	 // Section A3.2.1: Handshake process
-	 assume_B_DST_SRC_STABLE_BRESP: assume property (disable iff (!ARESETn) stable_before_handshake(BVALID, BREADY, BRESP))
-	   else $error ("Protocol Violation: Once the master has asserted BVALID, data and control information from master must remain stable [BRESP] until BREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
-	 assume_B_DST_SRC_BVALID_until_BREADY: assume property (disable iff (!ARESETn) valid_before_handshake(BVALID, BREADY))
-	   else $error ("Protocol Violation: Once BVALID is asserted it must remain asserted until the handshake occurs (A3.2.1 Handshake process, pA3-39).");
+	 cp_B_DST_SRC_STABLE_BRESP: assume property (disable iff (!ARESETn) stable_before_handshake(BVALID, BREADY, BRESP))
+	   else $error ("Violation: Once the master has asserted BVALID, data and control information",
+			"from master must remain stable [BRESP] until BREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
+	 cp_B_DST_SRC_BVALID_until_BREADY: assume property (disable iff (!ARESETn) valid_before_handshake(BVALID, BREADY))
+	   else $error ("Violation: Once BVALID is asserted it must remain asserted until the handshake",
+			"occurs (A3.2.1 Handshake process, pA3-39).");
 	 // Disable iff not ARM recommended
-	 assert_B_DST_SRC_READY_MAXWAIT: assert property (disable iff (!ARESETn) handshake_max_wait(BVALID, BREADY, MAXWAIT))
-	   else $error ("Protocol Violation: BREADY should be asserted within MAXWAIT cycles of BVALID being asserted.");
+	 ap_B_DST_SRC_READY_MAXWAIT: assert property (disable iff (!ARESETn) handshake_max_wait(BVALID, BREADY, MAXWAIT))
+	   else $error ("Violation: BREADY should be asserted within MAXWAIT cycles of BVALID being asserted (AMBA Recommended).");
       end
    endgenerate
 endmodule // amba_axi4_write_response_channel

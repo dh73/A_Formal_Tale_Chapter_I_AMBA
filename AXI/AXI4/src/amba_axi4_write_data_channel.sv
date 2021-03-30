@@ -15,65 +15,68 @@
  */
 `default_nettype wire
 module amba_axi4_write_data_channel #(parameter DATA_WIDTH=32,
+				      parameter STRB_WIDTH=4,
 				      parameter MAXWAIT = 16,
-				      parameter TYPE = 0, //0 source, 1 dest, [2 mon, 3 cons]
-				      localparam STRB_WIDTH=DATA_WIDTH/8)
+				      parameter TYPE = 0 //0 source, 1 dest, [2 mon, 3 cons]
+				      )
    (input wire                  ACLK,
     input wire 			ARESETn,
     input wire 			WVALID,
     input wire 			WREADY,
     input wire [DATA_WIDTH-1:0] WDATA,
-    input wire [STRB_WIDTH:0] 	WSTRB);
-   
+    input wire [STRB_WIDTH-1:0]	WSTRB);
+
    // Import the properties in this scope
    import amba_axi4_single_interface_requirements::*;
    // Default clocking for all properties
    default clocking axi4_aclk @(posedge ACLK); endclocking
-   localparam WDATA_BYTES = STRB_WIDTH;
    logic [DATA_WIDTH-1:0] 	mask_wdata;
-   logic [DATA_WIDTH-1:0] 	WDATAvalid;
    logic 			first_point;
+   for (genvar n = 0; n < STRB_WIDTH; n++) begin: mask_valid_byte_lanes
+      assign mask_wdata[(8*n)+7:(8*n)] = {8{WSTRB[n]}};
+   end
    always_ff @(posedge ACLK) begin
       if (!ARESETn) first_point <= 1'b1;
       else          first_point <= 1'b0;
-   end
-   always_comb begin
-      genvar n;
-      for (n = 0; n < WDATA_BYTES; n++) begin: mask_valid_byte_lanes
-	 mask_wdata[(8*n)+7:(8*n)] = {8{WSTRB[n]}};
-      end
-      WDATAvalid = mask_wdata & WDATA;
    end
    // >> Checker starts here <<
    generate
       if (TYPE == 0) begin: source_properties
 	 // Section A3.1.2: Reset
-	 assert_W_SRC_DST_EXIT_RESET:   assert property (exit_from_reset(ARESETn, first_point, WVALID))
-	   else $error ("Protocol Violation: WVALID must be low for the first clock edge after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
+	 ap_W_SRC_DST_EXIT_RESET:   assert property (exit_from_reset(ARESETn, first_point, WVALID))
+	   else $error ("Violation: WVALID must be low for the first clock edge",
+			"after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
 	 // Section A3.2.1: Handshake process
-	 assert_W_SRC_DST_STABLE_WSTRB: assert property (disable iff (!ARESETn) stable_before_handshake(WVALID, WREADY, WSTRB))
-	   else $error ("Protocol Violation: Once the master has asserted WVALID, data and control information from master must remain stable [WSTRB] until WREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
-	 assert_W_SRC_DST_STABLE_WDATA: assert property (disable iff (!ARESETn) stable_before_handshake(WVALID, WREADY, WDATAvalid))
-	   else $error ("Protocol Violation: Once the master has asserted AWVALID, data and control information from master must remain stable [WDATA] until AWREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
-	 assert_W_SRC_DST_AWVALID_until_AWREADY: assert property (disable iff (!ARESETn) valid_before_handshake(WVALID, WREADY))
-	   else $error ("Protocol Violation: Once WVALID is asserted it must remain asserted until the handshake occurs  (A3.2.1 Handshake process, pA3-39).");
+	 ap_W_SRC_DST_STABLE_WSTRB: assert property (disable iff (!ARESETn) stable_before_handshake(WVALID, WREADY, WSTRB))
+	   else $error ("Violation: Once the master has asserted WVALID, data and control information",
+			"from master must remain stable [WSTRB] until WREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
+	 ap_W_SRC_DST_STABLE_WDATA: assert property (disable iff (!ARESETn) stable_before_handshake(WVALID, WREADY, (WDATA & mask_wdata)))
+	   else $error ("Violation: Once the master has asserted AWVALID, data and control information",
+			"from master must remain stable [WDATA] until AWREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
+	 ap_W_SRC_DST_AWVALID_until_AWREADY: assert property (disable iff (!ARESETn) valid_before_handshake(WVALID, WREADY))
+	   else $error ("Violation: Once WVALID is asserted it must remain asserted until the handshake",
+			"occurs (A3.2.1 Handshake process, pA3-39).");
 	 // Disable iff not ARM recommended
-	 assume_W_SRC_DST_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(WVALID, WREADY, MAXWAIT))
-	   else $error ("Protocol Violation: AWREADY should be asserted within MAXWAIT cycles of AWVALID being asserted.");
+	 cp_W_SRC_DST_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(WVALID, WREADY, MAXWAIT))
+	   else $error ("Violation: AWREADY should be asserted within MAXWAIT cycles of AWVALID being asserted (AMBA Recommended).");
       end
       else begin: destination_properties
 	 // Section A3.1.2: Reset
-	 assume_W_DST_SRC_EXIT_RESET:   assume property (exit_from_reset(ARESETn, first_point, WVALID))
-	   else $error ("Protocol Violation: WVALID must be low for the first clock edge after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
+	 cp_W_DST_SRC_EXIT_RESET:   assume property (exit_from_reset(ARESETn, first_point, WVALID))
+	   else $error ("Violation: WVALID must be low for the first clock edge",
+			"after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
 	 // Section A3.2.1: Handshake process
-	 assume_W_DST_SRC_STABLE_AWPROT: assume property (disable iff (!ARESETn) stable_before_handshake(WVALID, WREADY, WSTRB))
-	   else $error ("Protocol Violation: Once the master has asserted WVALID, data and control information from master must remain stable [WSTRB] until AWREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
-	 assume_W_DST_SRC_STABLE_AWADDR: assume property (disable iff (!ARESETn) stable_before_handshake(WVALID, WREADY, WDATAvalid))
-	   else $error ("Protocol Violation: Once the master has asserted WVALID, data and control information from master must remain stable [WDATA] until AWREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
-	 assume_W_DST_SRC_AWVALID_until_AWREADY: assume property (disable iff (!ARESETn) valid_before_handshake(WVALID, WREADY))
-	   else $error ("Protocol Violation: Once WVALID is asserted it must remain asserted until the handshake occurs  (A3.2.1 Handshake process, pA3-39).");
-	 assert_W_DST_SRC_READY_MAXWAIT: assert property (disable iff (!ARESETn) handshake_max_wait(WVALID, WREADY, MAXWAIT))
-	   else $error ("Protocol Violation: WREADY should be asserted within MAXWAIT cycles of WVALID being asserted.");
+	 cp_W_DST_SRC_STABLE_AWPROT: assume property (disable iff (!ARESETn) stable_before_handshake(WVALID, WREADY, WSTRB))
+	   else $error ("Violation: Once the master has asserted WVALID, data and control information",
+			"from master must remain stable [WSTRB] until AWREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
+	 cp_W_DST_SRC_STABLE_AWADDR: assume property (disable iff (!ARESETn) stable_before_handshake(WVALID, WREADY, (WDATA & mask_wdata)))
+	   else $error ("Violation: Once the master has asserted WVALID, data and control information",
+			"from master must remain stable [WDATA] until AWREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
+	 cp_W_DST_SRC_AWVALID_until_AWREADY: assume property (disable iff (!ARESETn) valid_before_handshake(WVALID, WREADY))
+	   else $error ("Violation: Once WVALID is asserted it must remain asserted until the handshake",
+			"occurs  (A3.2.1 Handshake process, pA3-39).");
+	 ap_W_DST_SRC_READY_MAXWAIT: assert property (disable iff (!ARESETn) handshake_max_wait(WVALID, WREADY, MAXWAIT))
+	   else $error ("Violation: WREADY should be asserted within MAXWAIT cycles of WVALID being asserted (AMBA Recommended).");
       end
    endgenerate
 endmodule // amba_axi4_write_data_channel
