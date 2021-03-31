@@ -13,8 +13,7 @@
  *  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-`default_nettype wire
-typedef enum logic [1:0] {OKAY, EXOKAY, SLVERR, DECERR} responses_t;
+`default_nettype none
 module amba_axi4_write_response_channel #(parameter MAXWAIT = 16,
 					  parameter TYPE = 0) //0 source, 1 dest, [2 mon, 3 cons]
    (input wire ACLK,
@@ -70,4 +69,4 @@ module amba_axi4_write_response_channel #(parameter MAXWAIT = 16,
       end
    endgenerate
 endmodule // amba_axi4_write_response_channel
-`default_nettype none
+`default_nettype wire

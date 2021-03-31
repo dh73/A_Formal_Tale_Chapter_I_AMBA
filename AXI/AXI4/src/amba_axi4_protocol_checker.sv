@@ -1,4 +1,5 @@
 `default_nettype none
+typedef enum logic [1:0] {OKAY, EXOKAY, SLVERR, DECERR} responses_t;
 module amba_axi4_protocol_checker #(parameter ADDRESS_WIDTH=32,
 				    parameter DATA_WIDTH=64,
 				    parameter MAXWAIT=16,
