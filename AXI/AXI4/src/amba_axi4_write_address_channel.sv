@@ -13,11 +13,15 @@
  *  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-`default_nettype wire
-module amba_axi4_write_address_channel #(parameter ADDRESS_WIDTH=32,
-					 parameter MAXWAIT = 16,
-					 parameter TYPE = 0, //0 source, 1 dest, [2 mon, 3 cons]
-					 parameter EN_COVER = 1)
+`default_nettype none
+module amba_axi4_write_address_channel
+  import amba_axi4_protocol_checker_pkg::*;
+   #(parameter unsigned        ADDRESS_WIDTH   = 32,
+     parameter axi4_protocol_t AGENT_TYPE      = SOURCE,
+     parameter axi4_types_t    PROTOCOL_TYPE   = AXI4LITE,
+     parameter bit             ENABLE_COVER    = 1,
+     parameter bit             ENABLE_DEADLOCK = 1,
+     parameter unsigned        MAXWAIT         = 16)
    (input wire                     ACLK,
     input wire 			   ARESETn,
     input wire 			   AWVALID,
@@ -30,15 +34,14 @@ module amba_axi4_write_address_channel #(parameter ADDRESS_WIDTH=32,
    // Default clocking for all properties
    default clocking axi4_aclk @(posedge ACLK); endclocking
 
-   logic 			   first_point;
+   logic first_point;
    always_ff @(posedge ACLK) begin
       if (!ARESETn) first_point <= 1'b1;
       else          first_point <= 1'b0;
    end
 
-   // >> Checker starts here <<
    generate
-      if (TYPE == 0) begin: source_properties
+      if (AGENT_TYPE == SOURCE || AGENT_TYPE == MONITOR) begin: source_properties
 	 // Section A3.1.2: Reset
 	 ap_AW_SRC_DST_EXIT_RESET: assert property (exit_from_reset(ARESETn, first_point, AWVALID))
 	   else $error ("Violation: AWVALID must be low for the first clock edge",
@@ -53,13 +56,11 @@ module amba_axi4_write_address_channel #(parameter ADDRESS_WIDTH=32,
 	 ap_AW_SRC_DST_AWVALID_until_AWREADY: assert property (disable iff (!ARESETn) valid_before_handshake(AWVALID, AWREADY))
 	   else $error ("Violation: Once AWVALID is asserted it must remain asserted until the handshake",
 			"occurs (A3.2.1 Handshake process, pA3-39).");
-	 // Disable iff not ARM recommended
-	 cp_AW_SRC_DST_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(AWVALID, AWREADY, MAXWAIT))
-	   else $error ("Violation: AWREADY should be asserted within MAXWAIT cycles of AWVALID being asserted (AMBA recommended).");
-      end
-      else begin: destination_properties
+      end // block: source_properties
+
+      else if (AGENT_TYPE == DESTINATION || AGENT_TYPE == CONSTRAINT) begin: destination_properties
 	 // Section A3.1.2: Reset
-	 cp_AW_DST_SRC_EXIT_RESET:   assume property (exit_from_reset(ARESETn, first_point, AWVALID))
+	 cp_AW_DST_SRC_EXIT_RESET: assume property (exit_from_reset(ARESETn, first_point, AWVALID))
 	   else $error ("Violation: AWVALID must be low for the first clock edge",
 			"after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
 	 // Section A3.2.1: Handshake process
@@ -72,12 +73,12 @@ module amba_axi4_write_address_channel #(parameter ADDRESS_WIDTH=32,
 	 cp_AW_DST_SRC_AWVALID_until_AWREADY: assume property (disable iff (!ARESETn) valid_before_handshake(AWVALID, AWREADY))
 	   else $error ("Violation: Once AWVALID is asserted it must remain asserted until the handshake",
 			"occurs  (A3.2.1 Handshake process, pA3-39).");
-	 cp_AW_DST_SRC_READY_MAXWAIT: assert property (disable iff (!ARESETn) handshake_max_wait(AWVALID, AWREADY, MAXWAIT))
-	   else $error ("Violation: AWREADY should be asserted within MAXWAIT cycles of AWVALID being asserted (AMBA recommended).");
       end // block: destination_properties
-      
-      // Witnessing scenarios stated in the AMBA AXI4 spec
-      if (EN_COVER) begin: witness
+   endgenerate
+
+   // Witnessing scenarios stated in the AMBA AXI4 spec
+   generate
+      if (ENABLE_COVER) begin: witness
 	 wp_AWVALID_before_AWREADY: cover property (disable iff (!ARESETn) valid_before_ready(AWVALID, AWREADY))
 	   $info("Witnessed: Handshake process pA3-39, Figure A3-2 VALID before READY handshake capability.");
 	 wp_AWREADY_before_AWVALID: cover property (disable iff (!ARESETn) ready_before_valid(AWVALID, AWREADY))
@@ -86,5 +87,18 @@ module amba_axi4_write_address_channel #(parameter ADDRESS_WIDTH=32,
 	   $info("Witnessed: Handshake process pA3-39, Figure A3-4 VALID with READY handshake capability.");
       end
    endgenerate
+
+   // AMBA Recommended property for potential deadlock detection
+   generate
+      if (ENABLE_DEADLOCK)
+	if (AGENT_TYPE == DESTINATION || AGENT_TYPE == MONITOR) begin: deadlock_check
+	   ap_AW_SRC_DST_READY_MAXWAIT: assert property (disable iff (!ARESETn) handshake_max_wait(AWVALID, AWREADY, MAXWAIT))
+	     else $error ("Violation: AWREADY should be asserted within MAXWAIT cycles of AWVALID being asserted (AMBA recommended).");
+	end
+	else if (AGENT_TYPE == SOURCE || AGENT_TYPE == CONSTRAINT) begin: deadlock_cons
+	   cp_R_SRC_DST_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(RVALID, RREADY, MAXWAIT)) // TODO: hmm, analyse this again.
+	     else $error ("Violation: RREADY should be asserted within MAXWAIT cycles of RVALID being asserted (AMBA recommended).");
+	end
+   endgenerate
 endmodule // amba_axi4_write_address_channel
-`default_nettype none
+`default_nettype wire

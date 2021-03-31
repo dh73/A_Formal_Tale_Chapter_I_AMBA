@@ -14,9 +14,13 @@
  *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 `default_nettype none
-module amba_axi4_write_response_channel #(parameter MAXWAIT = 16,
-					  parameter TYPE = 0, //0 source, 1 dest, [2 mon, 3 cons]
-					  parameter EN_COVER = 1)
+module amba_axi4_write_response_channel
+  import amba_axi4_protocol_checker_pkg::*;
+   #(parameter axi4_protocol_t AGENT_TYPE      = SOURCE,
+     parameter axi4_types_t    PROTOCOL_TYPE   = AXI4LITE,
+     parameter bit             ENABLE_COVER    = 1,
+     parameter bit             ENABLE_DEADLOCK = 1,
+     parameter unsigned        MAXWAIT         = 16)
    (input wire ACLK,
     input wire ARESETn,
     input wire BVALID,
@@ -34,9 +38,8 @@ module amba_axi4_write_response_channel #(parameter MAXWAIT = 16,
       else          first_point <= 1'b0;
    end
 
-   // >> Checker starts here <<
    generate
-      if (TYPE == 0) begin: source_properties
+      if (AGENT_TYPE == SOURCE || AGENT_TYPE == MONITOR) begin: source_properties
 	 // Section A3.1.2: Reset
 	 ap_B_SRC_DST_EXIT_RESET: assert property (exit_from_reset(ARESETn, first_point, BVALID))
 	   else $error ("Violation: BVALID must be low for the first clock edge",
@@ -48,11 +51,8 @@ module amba_axi4_write_response_channel #(parameter MAXWAIT = 16,
 	 ap_B_SRC_DST_BVALID_until_BREADY: assert property (disable iff (!ARESETn) valid_before_handshake(BVALID, BREADY))
 	   else $error ("Violation: Once BVALID is asserted it must remain asserted until the handshake",
 			"occurs (A3.2.1 Handshake process, pA3-39).");
-	 // Disable iff not ARM recommended
-	 cp_B_SRC_DST_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(BVALID, BREADY, MAXWAIT))
-	   else $error ("Violation: BREADY should be asserted within MAXWAIT cycles of BVALID being asserted (AMBA Recommended).");
       end
-      else begin: destination_properties
+      else if (AGENT_TYPE == DESTINATION || AGENT_TYPE == CONSTRAINT) begin: destination_properties
 	 // Section A3.1.2: Reset
 	 cp_B_DST_SRC_EXIT_RESET:   assume property (exit_from_reset(ARESETn, first_point, BVALID))
 	   else $error ("Violation: BVALID must be low for the first clock edge",
@@ -64,12 +64,11 @@ module amba_axi4_write_response_channel #(parameter MAXWAIT = 16,
 	 cp_B_DST_SRC_BVALID_until_BREADY: assume property (disable iff (!ARESETn) valid_before_handshake(BVALID, BREADY))
 	   else $error ("Violation: Once BVALID is asserted it must remain asserted until the handshake",
 			"occurs (A3.2.1 Handshake process, pA3-39).");
-	 // Disable iff not ARM recommended
-	 ap_B_DST_SRC_READY_MAXWAIT: assert property (disable iff (!ARESETn) handshake_max_wait(BVALID, BREADY, MAXWAIT))
-	   else $error ("Violation: BREADY should be asserted within MAXWAIT cycles of BVALID being asserted (AMBA Recommended).");
       end // block: destination_properties
+   endgenerate
 
-      // Witnessing scenarios stated in the AMBA AXI4 spec
+   // Witnessing scenarios stated in the AMBA AXI4 spec
+   generate
       if (EN_COVER) begin: witness
 	 wp_BVALID_before_BREADY: cover property (disable iff (!ARESETn) valid_before_ready(BVALID, BREADY))
 	   $info("Witnessed: Handshake process pA3-39, Figure A3-2 VALID before READY handshake capability.");
@@ -78,6 +77,19 @@ module amba_axi4_write_response_channel #(parameter MAXWAIT = 16,
 	 wp_BVALID_with_BREADY: cover property (disable iff (!ARESETn) valid_with_ready(BVALID, BREADY))
 	   $info("Witnessed: Handshake process pA3-39, Figure A3-4 VALID with READY handshake capability.");
       end
+   endgenerate
+
+      // AMBA Recommended property for potential deadlock detection
+   generate
+      if (ENABLE_DEADLOCK)
+	if (AGENT_TYPE == DESTINATION || AGENT_TYPE == MONITOR) begin: deadlock_check
+	   ap_B_DST_SRC_READY_MAXWAIT: assert property (disable iff (!ARESETn) handshake_max_wait(BVALID, BREADY, MAXWAIT))
+	     else $error ("Violation: BREADY should be asserted within MAXWAIT cycles of BVALID being asserted (AMBA Recommended).");
+	end
+	else if (AGENT_TYPE == SOURCE || AGENT_TYPE == CONSTRAINT) begin: deadlock_cons
+	   cp_B_SRC_DST_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(BVALID, BREADY, MAXWAIT))
+	     else $error ("Violation: BREADY should be asserted within MAXWAIT cycles of BVALID being asserted (AMBA Recommended).");
+	end
    endgenerate
 endmodule // amba_axi4_write_response_channel
 `default_nettype wire
