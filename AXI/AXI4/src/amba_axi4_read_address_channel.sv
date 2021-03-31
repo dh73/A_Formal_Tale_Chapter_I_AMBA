@@ -74,10 +74,10 @@ module amba_axi4_read_address_channel
 			"occurs  (A3.2.1 Handshake process, pA3-39).");
       end // block: destination_properties
    endgenerate
-   
+
    generate
       // Witnessing scenarios stated in the AMBA AXI4 spec
-      if (EN_COVER) begin: witness
+      if (ENABLE_COVER) begin: witness
 	 wp_ARVALID_before_ARREADY: cover property (disable iff (!ARESETn) valid_before_ready(ARVALID, ARREADY))
 	   $info("Witnessed: Handshake process pA3-39, Figure A3-2 VALID before READY handshake capability.");
 	 wp_ARREADY_before_ARVALID: cover property (disable iff (!ARESETn) ready_before_valid(ARVALID, ARREADY))
@@ -86,7 +86,7 @@ module amba_axi4_read_address_channel
 	   $info("Witnessed: Handshake process pA3-39, Figure A3-4 VALID with READY handshake capability.");
       end
    endgenerate
-   
+
    // AMBA Recommended property for potential deadlock detection
    generate
       if (ENABLE_DEADLOCK)

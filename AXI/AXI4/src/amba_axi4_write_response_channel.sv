@@ -16,11 +16,11 @@
 `default_nettype none
 module amba_axi4_write_response_channel
   import amba_axi4_protocol_checker_pkg::*;
-   #(parameter axi4_protocol_t AGENT_TYPE      = SOURCE,
-     parameter axi4_types_t    PROTOCOL_TYPE   = AXI4LITE,
-     parameter bit             ENABLE_COVER    = 1,
-     parameter bit             ENABLE_DEADLOCK = 1,
-     parameter unsigned        MAXWAIT         = 16)
+   #(parameter axi4_agent_t AGENT_TYPE      = SOURCE,
+     parameter axi4_types_t PROTOCOL_TYPE   = AXI4LITE,
+     parameter bit          ENABLE_COVER    = 1,
+     parameter bit          ENABLE_DEADLOCK = 1,
+     parameter unsigned     MAXWAIT         = 16)
    (input wire ACLK,
     input wire ARESETn,
     input wire BVALID,
@@ -69,7 +69,7 @@ module amba_axi4_write_response_channel
 
    // Witnessing scenarios stated in the AMBA AXI4 spec
    generate
-      if (EN_COVER) begin: witness
+      if (ENABLE_COVER) begin: witness
 	 wp_BVALID_before_BREADY: cover property (disable iff (!ARESETn) valid_before_ready(BVALID, BREADY))
 	   $info("Witnessed: Handshake process pA3-39, Figure A3-2 VALID before READY handshake capability.");
 	 wp_BREADY_before_BVALID: cover property (disable iff (!ARESETn) ready_before_valid(BVALID, BREADY))

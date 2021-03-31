@@ -16,12 +16,12 @@
 `default_nettype none
 module amba_axi4_read_data_channel
   import amba_axi4_protocol_checker_pkg::*;
-  #(parameter unsigned        DATA_WIDTH      = 32,
-    parameter axi4_protocol_t AGENT_TYPE      = SOURCE,
-    parameter axi4_types_t    PROTOCOL_TYPE   = AXI4LITE,
-    parameter bit             ENABLE_COVER    = 1,
-    parameter bit             ENABLE_DEADLOCK = 1,
-    parameter unsigned        MAXWAIT         = 16)
+  #(parameter unsigned     DATA_WIDTH      = 32,
+    parameter axi4_agent_t AGENT_TYPE      = SOURCE,
+    parameter axi4_types_t PROTOCOL_TYPE   = AXI4LITE,
+    parameter bit          ENABLE_COVER    = 1,
+    parameter bit          ENABLE_DEADLOCK = 1,
+    parameter unsigned     MAXWAIT         = 16)
    (input wire                  ACLK,
     input wire 			ARESETn,
     input wire 			RVALID,
@@ -77,7 +77,7 @@ module amba_axi4_read_data_channel
 
    // Witnessing scenarios stated in the AMBA AXI4 spec
    generate
-      if (EN_COVER) begin: witness
+      if (ENABLE_COVER) begin: witness
 	 wp_RVALID_before_RREADY: cover property (disable iff (!ARESETn) valid_before_ready(RVALID, RREADY))
 	   $info("Witnessed: Handshake process pA3-39, Figure A3-2 VALID before READY handshake capability.");
 	 wp_RREADY_before_RVALID: cover property (disable iff (!ARESETn) ready_before_valid(RVALID, RREADY))
@@ -95,7 +95,7 @@ module amba_axi4_read_data_channel
 	     else $error ("Violation: RREADY should be asserted within MAXWAIT cycles of RVALID being asserted (AMBA recommended).");
 	end
 	else if (AGENT_TYPE == SOURCE || AGENT_TYPE == CONSTRAINT) begin: deadlock_cons
-	   cp_AW_DST_SRC_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(AWVALID, AWREADY, MAXWAIT))
+	   cp_R_DST_SRC_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(RVALID, RREADY, MAXWAIT))
 	     else $error ("Violation: AWREADY should be asserted within MAXWAIT cycles of AWVALID being asserted (AMBA recommended).");
 	end
    endgenerate

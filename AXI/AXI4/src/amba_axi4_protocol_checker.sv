@@ -16,15 +16,15 @@
 `default_nettype none
 module amba_axi4_protocol_checker
   import amba_axi4_protocol_checker_pkg::*;
-   #(parameter unsigned        ADDRESS_WIDTH   = AMBA_AXI4_ADDRESS_WIDTH,
-     parameter unsigned        DATA_WIDTH      = AMBA_AXI4_DATA_WIDTH,
-     parameter unsigned        MAXWAIT         = AMBA_AXI4_MAXWAIT,
-     parameter axi4_protocol_t AGENT_TYPE      = AMBA_AXI4_AGENT_TYPE,
-     parameter axi4_protocol_t PROTOCOL_TYPE   = AMBA_AXI4_PROTOCOL_TYPE,
-     parameter bit             ENABLE_COVER    = AMBA_AXI4_ENABLE_COVERS,
-     parameter bit             ENABLE_DEADLOCK = AMBA_AXI4_ARM_RECOMMENDED
+   #(parameter unsigned     ADDRESS_WIDTH   = AMBA_AXI4_ADDRESS_WIDTH,
+     parameter unsigned     DATA_WIDTH      = AMBA_AXI4_DATA_WIDTH,
+     parameter unsigned     MAXWAIT         = AMBA_AXI4_MAXWAIT,
+     parameter axi4_agent_t AGENT_TYPE      = AMBA_AXI4_AGENT_TYPE,
+     parameter axi4_types_t PROTOCOL_TYPE   = AMBA_AXI4_PROTOCOL_TYPE,
+     parameter bit          ENABLE_COVER    = AMBA_AXI4_ENABLE_COVERS,
+     parameter bit          ENABLE_DEADLOCK = AMBA_AXI4_ARM_RECOMMENDED,
      // Read only
-     localparam                STRB_WIDTH      = DATA_WIDTH/8)
+     localparam             STRB_WIDTH      = DATA_WIDTH/8)
    (input wire                     ACLK,
     input wire 			   ARESETn,
     // Write Address Channel (AW)
@@ -90,7 +90,7 @@ module amba_axi4_protocol_checker
        .ENABLE_DEADLOCK(ENABLE_DEADLOCK),
        .MAXWAIT(MAXWAIT))
    AR_simple_iface_checks (.*);
-   
+
    // Read data channel simple properties
    amba_axi4_read_data_channel
      #(.DATA_WIDTH(DATA_WIDTH),

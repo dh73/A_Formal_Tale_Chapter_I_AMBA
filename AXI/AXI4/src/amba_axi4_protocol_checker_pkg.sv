@@ -13,23 +13,22 @@
  *  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
-`ifdef __AMBA_AXI4_PROTOCOL_CHECKER_PKG__
+`ifndef __AMBA_AXI4_PROTOCOL_CHECKER_PKG__
  `define __AMBA_AXI4_PROTOCOL_CHECKER_PKG__
 package amba_axi4_protocol_checker_pkg;
    typedef enum logic [1:0] {OKAY, EXOKAY, SLVERR, DECERR} responses_t;
-   typedef enum logic [1:0] {SOURCE, DESTINATION, MONITOR, CONSTRAINT} axi4_protocol_t;
+   typedef enum logic [1:0] {SOURCE, DESTINATION, MONITOR, CONSTRAINT} axi4_agent_t;
    typedef enum logic [0:0] {AXI4LITE, AXI4} axi4_types_t;
-
+   
    // AXI4 Port Related Settings
-   parameter unsigned AMBA_AXI4_ADDRESS_WIDTH        = 32;
-   parameter unsigned AMBA_AXI4_DATA_WIDTH           = 64;
-   parameter unsigned AMBA_AXI4_MAXWAIT              = 16;
+   localparam unsigned AMBA_AXI4_ADDRESS_WIDTH = 32;
+   localparam unsigned AMBA_AXI4_DATA_WIDTH    = 64;
    
    // AXI4 Protocol Checker Configuration
-   parameter axi4_protocol_t AMBA_AXI4_AGENT_TYPE    = SOURCE;
-   parameter axi4_protocol_t AMBA_AXI4_PROTOCOL_TYPE = AXI4LITE;
-   parameter bit AMBA_AXI4_ENABLE_COVERS             = 1;
-   parameter bit AMBA_AXI4_ARM_RECOMMENDED           = 1;
-   parameter unsigned AMBA_AXI4_MAXWAIT              = 16;
+   localparam axi4_agent_t AMBA_AXI4_AGENT_TYPE    = SOURCE;
+   localparam axi4_types_t AMBA_AXI4_PROTOCOL_TYPE = AXI4LITE;
+   localparam bit AMBA_AXI4_ENABLE_COVERS          = 1;
+   localparam bit AMBA_AXI4_ARM_RECOMMENDED        = 1;
+   localparam unsigned AMBA_AXI4_MAXWAIT           = 16;
 endpackage // amba_axi4_protocol_checker_pkg
 `endif
