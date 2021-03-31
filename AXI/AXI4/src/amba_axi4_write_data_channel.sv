@@ -17,8 +17,8 @@
 module amba_axi4_write_data_channel #(parameter DATA_WIDTH=32,
 				      parameter STRB_WIDTH=4,
 				      parameter MAXWAIT = 16,
-				      parameter TYPE = 0 //0 source, 1 dest, [2 mon, 3 cons]
-				      )
+				      parameter TYPE = 0, //0 source, 1 dest, [2 mon, 3 cons]
+				      parameter EN_COVER = 1)
    (input wire                  ACLK,
     input wire 			ARESETn,
     input wire 			WVALID,
@@ -77,6 +77,16 @@ module amba_axi4_write_data_channel #(parameter DATA_WIDTH=32,
 			"occurs  (A3.2.1 Handshake process, pA3-39).");
 	 ap_W_DST_SRC_READY_MAXWAIT: assert property (disable iff (!ARESETn) handshake_max_wait(WVALID, WREADY, MAXWAIT))
 	   else $error ("Violation: WREADY should be asserted within MAXWAIT cycles of WVALID being asserted (AMBA Recommended).");
+      end // block: destination_properties
+
+      // Witnessing scenarios stated in the AMBA AXI4 spec
+      if (EN_COVER) begin: witness
+	 wp_WVALID_before_WREADY: cover property (disable iff (!ARESETn) valid_before_ready(WVALID, WREADY))
+	   $info("Witnessed: Handshake process pA3-39, Figure A3-2 VALID before READY handshake capability.");
+	 wp_WREADY_before_WVALID: cover property (disable iff (!ARESETn) ready_before_valid(WVALID, WREADY))
+	   $info("Witnessed: Handshake process pA3-39, Figure A3-3 READY before VALID handshake capability.");
+	 wp_WVALID_with_WREADY: cover property (disable iff (!ARESETn) valid_with_ready(WVALID, WREADY))
+	   $info("Witnessed: Handshake process pA3-39, Figure A3-4 VALID with READY handshake capability.");
       end
    endgenerate
 endmodule // amba_axi4_write_data_channel

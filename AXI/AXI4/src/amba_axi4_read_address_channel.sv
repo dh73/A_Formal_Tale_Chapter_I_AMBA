@@ -16,7 +16,8 @@
 `default_nettype wire
 module amba_axi4_read_address_channel #(parameter ADDRESS_WIDTH=32,
 					parameter MAXWAIT = 16,
-					parameter TYPE = 0) //0 source, 1 dest, [2 mon, 3 cons]
+					parameter TYPE = 0, //0 source, 1 dest, [2 mon, 3 cons]
+					parameter EN_COVER = 1)
    (input wire                     ACLK,
     input wire 			   ARESETn,
     input wire 			   ARVALID,
@@ -72,6 +73,16 @@ module amba_axi4_read_address_channel #(parameter ADDRESS_WIDTH=32,
 			"occurs  (A3.2.1 Handshake process, pA3-39).");
 	 ap_AR_DST_SRC_READY_MAXWAIT: assert property (disable iff (!ARESETn) handshake_max_wait(ARVALID, ARREADY, MAXWAIT))
 	   else $error ("Violation: ARREADY should be asserted within MAXWAIT cycles of ARVALID being asserted (AMBA recommended.");
+      end // block: destination_properties
+
+      // Witnessing scenarios stated in the AMBA AXI4 spec
+      if (EN_COVER) begin: witness
+	 wp_ARVALID_before_ARREADY: cover property (disable iff (!ARESETn) valid_before_ready(ARVALID, ARREADY))
+	   $info("Witnessed: Handshake process pA3-39, Figure A3-2 VALID before READY handshake capability.");
+	 wp_ARREADY_before_ARVALID: cover property (disable iff (!ARESETn) ready_before_valid(ARVALID, ARREADY))
+	   $info("Witnessed: Handshake process pA3-39, Figure A3-3 READY before VALID handshake capability.");
+	 wp_ARVALID_with_ARREADY: cover property (disable iff (!ARESETn) valid_with_ready(ARVALID, ARREADY))
+	   $info("Witnessed: Handshake process pA3-39, Figure A3-4 VALID with READY handshake capability.");
       end
    endgenerate
 endmodule // amba_axi4_read_address_channel

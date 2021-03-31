@@ -106,7 +106,7 @@ package amba_axi4_single_interface_requirements;
     *   \|===|/	   		                                      *
     *    '---'							      */
    property valid_with_ready(valid, ready);
-      ready && valid;
+      valid && ready;
    endproperty // valid_with_ready
 
    // Deadlock (ARM Recommended)
