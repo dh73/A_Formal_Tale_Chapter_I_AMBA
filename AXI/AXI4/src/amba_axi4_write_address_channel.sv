@@ -19,6 +19,7 @@ module amba_axi4_write_address_channel
    #(parameter unsigned     ADDRESS_WIDTH   = 32,
      parameter axi4_agent_t AGENT_TYPE      = SOURCE,
      parameter axi4_types_t PROTOCOL_TYPE   = AXI4LITE,
+     parameter bit          CHECK_PARAMS    = 1,
      parameter bit          ENABLE_COVER    = 1,
      parameter bit          ENABLE_DEADLOCK = 1,
      parameter unsigned     MAXWAIT         = 16)
@@ -40,6 +41,9 @@ module amba_axi4_write_address_channel
       else          first_point <= 1'b0;
    end
 
+   /*		 ><><><><><><><><><><><><><><><><><><><><             *
+    *		 Chapter A3. Single Interface Requirements            *
+    *		 ><><><><><><><><><><><><><><><><><><><><	      */
    generate
       if (AGENT_TYPE == SOURCE || AGENT_TYPE == MONITOR) begin: source_properties
 	 // Section A3.1.2: Reset
@@ -76,18 +80,6 @@ module amba_axi4_write_address_channel
       end // block: destination_properties
    endgenerate
 
-   // Witnessing scenarios stated in the AMBA AXI4 spec
-   generate
-      if (ENABLE_COVER) begin: witness
-	 wp_AWVALID_before_AWREADY: cover property (disable iff (!ARESETn) valid_before_ready(AWVALID, AWREADY))
-	   $info("Witnessed: Handshake process pA3-39, Figure A3-2 VALID before READY handshake capability.");
-	 wp_AWREADY_before_AWVALID: cover property (disable iff (!ARESETn) ready_before_valid(AWVALID, AWREADY))
-	   $info("Witnessed: Handshake process pA3-39, Figure A3-3 READY before VALID handshake capability.");
-	 wp_AWVALID_with_AWREADY: cover property (disable iff (!ARESETn) valid_with_ready(AWVALID, AWREADY))
-	   $info("Witnessed: Handshake process pA3-39, Figure A3-4 VALID with READY handshake capability.");
-      end
-   endgenerate
-
    // AMBA Recommended property for potential deadlock detection
    generate
       if (ENABLE_DEADLOCK)
@@ -100,5 +92,18 @@ module amba_axi4_write_address_channel
 	     else $error ("Violation: RREADY should be asserted within MAXWAIT cycles of RVALID being asserted (AMBA recommended).");
 	end
    endgenerate
+
+   // Witnessing scenarios stated in the AMBA AXI4 spec
+   generate
+      if (ENABLE_COVER) begin: witness
+	 wp_AWVALID_before_AWREADY: cover property (disable iff (!ARESETn) valid_before_ready(AWVALID, AWREADY))
+	   $info("Witnessed: Handshake process pA3-39, Figure A3-2 VALID before READY handshake capability.");
+	 wp_AWREADY_before_AWVALID: cover property (disable iff (!ARESETn) ready_before_valid(AWVALID, AWREADY))
+	   $info("Witnessed: Handshake process pA3-39, Figure A3-3 READY before VALID handshake capability.");
+	 wp_AWVALID_with_AWREADY: cover property (disable iff (!ARESETn) valid_with_ready(AWVALID, AWREADY))
+	   $info("Witnessed: Handshake process pA3-39, Figure A3-4 VALID with READY handshake capability.");
+      end
+   endgenerate
+
 endmodule // amba_axi4_write_address_channel
 `default_nettype wire

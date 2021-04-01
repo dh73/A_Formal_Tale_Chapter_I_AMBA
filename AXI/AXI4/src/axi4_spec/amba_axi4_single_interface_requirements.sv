@@ -127,5 +127,71 @@ package amba_axi4_single_interface_requirements;
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
     *	      Section A3.2.2: Channel signaling requirements          *
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
+
+   // TBD
+
+   /*		 ><><><><><><><><><><><><><><><><><><><><             *
+    *	     Section A3.4.4 Read and write response structure         *
+    *		 ><><><><><><><><><><><><><><><><><><><><	      */
+
+   /* ,         ,                                                     *
+    * |\\\\ ////|  "OKAY: Normal access success. Indicates that a     *
+    * | \\\V/// |   normal access has been successful. Can also       *
+    * |	 |~~~|	|   indicate an exclusive access has failed".         *
+    * |	 |===|	|   Ref: A3.4.4 Read and write response structure,    *
+    * |	 |A  |	|   pA3-57, Table A3-4.                               *
+    * |	 | X |	|                                                     *
+    *  \ |  I| /                                                      *
+    *   \|===|/	   		                                      *
+    *    '---'							      */
+   property rdwr_response_okay(valid, ready, resp);
+      (valid && ready && 
+       (resp == amba_axi4_protocol_checker_pkg::OKAY));
+   endproperty // rdwr_response_okay
+   
+   /* ,         ,                                                     *
+    * |\\\\ ////|  "EXOKAY: Exclusive access okay. Indicates that     *
+    * | \\\V/// |   either the read or write portion of an exclusive  *
+    * |	 |~~~|	|   access has been succesful".                       *
+    * |	 |===|	|   Ref: A3.4.4 Read and write response structure,    *
+    * |	 |A  |	|   pA3-57, Table A3-4.                               *
+    * |	 | X |	|                                                     *
+    *  \ |  I| /                                                      *
+    *   \|===|/	   		                                      *
+    *    '---'							      */
+   property rdwr_response_exokay (valid, ready, resp);
+      (valid && ready && 
+       (resp == amba_axi4_protocol_checker_pkg::EXOKAY));
+   endproperty // rdwr_response_exokay
+
+   /* ,         ,                                                     *
+    * |\\\\ ////|  "SLVERR: Slave error. Used when the access has     *
+    * | \\\V/// |   reached the slave successfully, but the slave     *
+    * |	 |~~~|	|   wishes to return an error condition to the        *
+    * |	 |===|	|   originating master".                              *
+    * |	 |A  |	|   Ref: A3.4.4 Read and write response structure,    *
+    * |	 | X |	|   pA3-57, Table A3-4.                               *
+    *  \ |  I| /                                                      *
+    *   \|===|/	   		                                      *
+    *    '---'							      */
+   property rdwr_response_slverr (valid, ready, resp);
+      (valid && ready && 
+       (resp == amba_axi4_protocol_checker_pkg::SLVERR));
+   endproperty // rdwr_response_slverr
+   
+   /* ,         ,                                                     *
+    * |\\\\ ////|  "DECERR: Decode error. Generated, typically by an  *
+    * | \\\V/// |   interconnect component, to indicate that there    *
+    * |	 |~~~|	|   is no slave at the transaction address.           *
+    * |	 |===|	|   Ref: A3.4.4 Read and write response structure,    *
+    * |	 |A  |	|   pA3-57, Table A3-4.                               *
+    * |	 | X |	|                                                     *
+    *  \ |  I| /                                                      *
+    *   \|===|/	   		                                      *
+    *    '---'							      */
+   property rdwr_response_decerr (valid, ready, resp);
+      (valid && ready && 
+       (resp == amba_axi4_protocol_checker_pkg::DECERR));
+   endproperty // rdwr_response_decerr
 endpackage // amba_axi4_single_interface_requirements
 `endif

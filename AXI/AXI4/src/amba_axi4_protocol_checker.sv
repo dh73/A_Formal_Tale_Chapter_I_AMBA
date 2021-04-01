@@ -23,6 +23,7 @@ module amba_axi4_protocol_checker
      parameter axi4_types_t PROTOCOL_TYPE   = AMBA_AXI4_PROTOCOL_TYPE,
      parameter bit          ENABLE_COVER    = AMBA_AXI4_ENABLE_COVERS,
      parameter bit          ENABLE_DEADLOCK = AMBA_AXI4_ARM_RECOMMENDED,
+     parameter bit          CHECK_PARAMS    = AMBA_AXI4_CHECK_PARAMETERS,
      // Read only
      localparam             STRB_WIDTH      = DATA_WIDTH/8)
    (input wire                     ACLK,
@@ -40,7 +41,7 @@ module amba_axi4_protocol_checker
     // Write Response Channel (B)
     input wire 			   BVALID,
     input wire 			   BREADY,
-    input wire responses_t         BRESP,
+    input wire [1:0] 		   BRESP,
     // Read Address Channel (AR)
     input wire 			   ARVALID,
     input wire 			   ARREADY,
@@ -52,7 +53,7 @@ module amba_axi4_protocol_checker
     input wire [DATA_WIDTH-1:0]    RDATA,
     input wire [1:0] 		   RRESP);
 
-   // Write addres channel simple properties
+   // Write addres channel properties
    amba_axi4_write_address_channel
      #(.ADDRESS_WIDTH(ADDRESS_WIDTH),
        .AGENT_TYPE(AGENT_TYPE),
@@ -62,17 +63,18 @@ module amba_axi4_protocol_checker
        .MAXWAIT(MAXWAIT))
    AW_simple_iface_checks (.*);
 
-   // Write data channel simple properties
+   // Write data channel properties
    amba_axi4_write_data_channel
      #(.DATA_WIDTH(DATA_WIDTH),
        .AGENT_TYPE(AGENT_TYPE),
        .PROTOCOL_TYPE(PROTOCOL_TYPE),
+       .CHECK_PARAMS(CHECK_PARAMS),
        .ENABLE_COVER(ENABLE_COVER),
        .ENABLE_DEADLOCK(ENABLE_DEADLOCK),
        .MAXWAIT(MAXWAIT))
    W_simple_iface_checks (.*);
 
-   // Write response channel simple properties
+   // Write response channel properties
    amba_axi4_write_response_channel
      #(.AGENT_TYPE(AGENT_TYPE),
        .PROTOCOL_TYPE(PROTOCOL_TYPE),
@@ -81,7 +83,7 @@ module amba_axi4_protocol_checker
        .MAXWAIT(MAXWAIT))
    B_simple_iface_checks (.*);
 
-   // Read address channel simple properties
+   // Read address channel properties
    amba_axi4_read_address_channel
      #(.ADDRESS_WIDTH(ADDRESS_WIDTH),
        .AGENT_TYPE(AGENT_TYPE),
@@ -91,11 +93,12 @@ module amba_axi4_protocol_checker
        .MAXWAIT(MAXWAIT))
    AR_simple_iface_checks (.*);
 
-   // Read data channel simple properties
+   // Read data channel properties
    amba_axi4_read_data_channel
      #(.DATA_WIDTH(DATA_WIDTH),
        .AGENT_TYPE(AGENT_TYPE),
        .PROTOCOL_TYPE(PROTOCOL_TYPE),
+       .CHECK_PARAMS(CHECK_PARAMS),
        .ENABLE_COVER(ENABLE_COVER),
        .ENABLE_DEADLOCK(ENABLE_DEADLOCK),
        .MAXWAIT(MAXWAIT))

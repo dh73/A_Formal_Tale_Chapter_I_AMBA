@@ -19,6 +19,7 @@ module amba_axi4_read_data_channel
   #(parameter unsigned     DATA_WIDTH      = 32,
     parameter axi4_agent_t AGENT_TYPE      = SOURCE,
     parameter axi4_types_t PROTOCOL_TYPE   = AXI4LITE,
+    parameter bit          CHECK_PARAMS    = 1,
     parameter bit          ENABLE_COVER    = 1,
     parameter bit          ENABLE_DEADLOCK = 1,
     parameter unsigned     MAXWAIT         = 16)
@@ -27,10 +28,12 @@ module amba_axi4_read_data_channel
     input wire 			RVALID,
     input wire 			RREADY,
     input wire [DATA_WIDTH-1:0] RDATA,
-    input wire [1:0] 		RRESP);
+    input wire [1:0]	        RRESP);
 
    // Import the properties in this scope
+   import definition_of_axi4_lite::*;
    import amba_axi4_single_interface_requirements::*;
+
    // Default clocking for all properties
    default clocking axi4_aclk @(posedge ACLK); endclocking
    logic first_point;
@@ -39,6 +42,32 @@ module amba_axi4_read_data_channel
       else          first_point <= 1'b0;
    end
 
+   /*		 ><><><><><><><><><><><><><><><><><><><><             *
+    *		 Section B1.1: Definition of AXI4-Lite                *
+    *		 ><><><><><><><><><><><><><><><><><><><><	      */
+   generate
+      if (PROTOCOL_TYPE == AXI4LITE) begin: axi4lite_defs
+	 if (CHECK_PARAMS) begin: check_dataw
+	    ap_R_AXI4LITE_DATAWIDTH: assert property (axi4l_databus_width(DATA_WIDTH))
+	      else $error("Violation: AXI4-Lite supports a data bus width of 32-bit or 64-bit",
+			  "(B.1 Definition of AXI4-Lite, pB1-126).");
+	 end
+	 if (AGENT_TYPE == DESTINATION || AGENT_TYPE == MONITOR) begin: a_exclusive_responses
+	    ap_R_UNSUPPORTED_RESPONSE: assert property(disable iff (!ARESETn) unsupported_transfer_status(RVALID, RRESP, EXOKAY))
+	      else $error("Violation: The EXOKAY response is not supported on the read data",
+			  "and write response channels (B1.1.1 Signal List, pB1-126).");
+	 end
+	 else if (AGENT_TYPE == SOURCE || AGENT_TYPE == CONSTRAINT) begin: c_exclusive_responses
+	    cp_R_UNSUPPORTED_RESPONSE: assume property(disable iff (!ARESETn) unsupported_transfer_status(RVALID, RRESP, EXOKAY))
+	      else $error("Violation: The EXOKAY response is not supported on the read data",
+			  "and write response channels (B1.1.1 Signal List, pB1-126).");
+	 end
+      end
+   endgenerate
+
+   /*		 ><><><><><><><><><><><><><><><><><><><><             *
+    *		 Chapter A3. Single Interface Requirements            *
+    *		 ><><><><><><><><><><><><><><><><><><><><	      */
    generate
       if (AGENT_TYPE == SOURCE || AGENT_TYPE == MONITOR) begin: source_properties
 	 // Section A3.1.2: Reset
@@ -75,18 +104,6 @@ module amba_axi4_read_data_channel
       end // block: destination_properties
    endgenerate
 
-   // Witnessing scenarios stated in the AMBA AXI4 spec
-   generate
-      if (ENABLE_COVER) begin: witness
-	 wp_RVALID_before_RREADY: cover property (disable iff (!ARESETn) valid_before_ready(RVALID, RREADY))
-	   $info("Witnessed: Handshake process pA3-39, Figure A3-2 VALID before READY handshake capability.");
-	 wp_RREADY_before_RVALID: cover property (disable iff (!ARESETn) ready_before_valid(RVALID, RREADY))
-	   $info("Witnessed: Handshake process pA3-39, Figure A3-3 READY before VALID handshake capability.");
-	 wp_RVALID_with_RREADY: cover property (disable iff (!ARESETn) valid_with_ready(RVALID, RREADY))
-	   $info("Witnessed: Handshake process pA3-39, Figure A3-4 VALID with READY handshake capability.");
-      end
-   endgenerate
-
    // AMBA Recommended property for potential deadlock detection
    generate
       if (ENABLE_DEADLOCK)
@@ -98,6 +115,29 @@ module amba_axi4_read_data_channel
 	   cp_R_DST_SRC_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(RVALID, RREADY, MAXWAIT))
 	     else $error ("Violation: AWREADY should be asserted within MAXWAIT cycles of AWVALID being asserted (AMBA recommended).");
 	end
+   endgenerate
+
+   // Witnessing scenarios stated in the AMBA AXI4 spec
+   generate
+      if (ENABLE_COVER) begin: witness
+	 wp_RVALID_before_RREADY: cover property (disable iff (!ARESETn) valid_before_ready(RVALID, RREADY))
+	   $info("Witnessed: Handshake process pA3-39, Figure A3-2 VALID before READY handshake capability.");
+	 wp_RREADY_before_RVALID: cover property (disable iff (!ARESETn) ready_before_valid(RVALID, RREADY))
+	   $info("Witnessed: Handshake process pA3-39, Figure A3-3 READY before VALID handshake capability.");
+	 wp_RVALID_with_RREADY: cover property (disable iff (!ARESETn) valid_with_ready(RVALID, RREADY))
+	   $info("Witnessed: Handshake process pA3-39, Figure A3-4 VALID with READY handshake capability.");
+
+	 if (PROTOCOL_TYPE != AXI4LITE) begin: exok_resp
+	    wp_READ_RESP_EXOKAY: cover property (disable iff (!ARESETn) rdwr_response_exokay(RVALID, RREADY, RRESP))
+	      $info("Witnessed: EXOKAY, exclusive access success, A3-58 with Table A3-4.");
+	 end
+	 wp_READ_RESP_OKAY: cover property (disable iff (!ARESETn) rdwr_response_okay(RVALID, RREADY, RRESP))
+	   $info("Witnessed: OKAY, normal access success, A3-57 with Table A3-4.");
+	 wp_READ_RESP_SLVERR: cover property (disable iff (!ARESETn) rdwr_response_slverr(RVALID, RREADY, RRESP))
+	   $info("Witnessed: SLVERR, slave error, A3-57 with Table A3-4.");
+	 wp_READ_RESP_DECERR: cover property (disable iff (!ARESETn) rdwr_response_decerr(RVALID, RREADY, RRESP))
+	   $info("Witnessed: DECERR, decode error, A3-57 with Table A3-4.");
+      end
    endgenerate
 endmodule // amba_axi4_read_data_channel
 `default_nettype wire

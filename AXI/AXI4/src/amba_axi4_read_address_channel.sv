@@ -40,6 +40,9 @@ module amba_axi4_read_address_channel
       else          first_point <= 1'b0;
    end
 
+   /*		 ><><><><><><><><><><><><><><><><><><><><             *
+    *		 Chapter A3. Single Interface Requirements            *
+    *		 ><><><><><><><><><><><><><><><><><><><><	      */
    generate
       if (AGENT_TYPE == SOURCE || AGENT_TYPE == MONITOR) begin: source_properties
 	 // Section A3.1.2: Reset
@@ -75,18 +78,6 @@ module amba_axi4_read_address_channel
       end // block: destination_properties
    endgenerate
 
-   generate
-      // Witnessing scenarios stated in the AMBA AXI4 spec
-      if (ENABLE_COVER) begin: witness
-	 wp_ARVALID_before_ARREADY: cover property (disable iff (!ARESETn) valid_before_ready(ARVALID, ARREADY))
-	   $info("Witnessed: Handshake process pA3-39, Figure A3-2 VALID before READY handshake capability.");
-	 wp_ARREADY_before_ARVALID: cover property (disable iff (!ARESETn) ready_before_valid(ARVALID, ARREADY))
-	   $info("Witnessed: Handshake process pA3-39, Figure A3-3 READY before VALID handshake capability.");
-	 wp_ARVALID_with_ARREADY: cover property (disable iff (!ARESETn) valid_with_ready(ARVALID, ARREADY))
-	   $info("Witnessed: Handshake process pA3-39, Figure A3-4 VALID with READY handshake capability.");
-      end
-   endgenerate
-
    // AMBA Recommended property for potential deadlock detection
    generate
       if (ENABLE_DEADLOCK)
@@ -98,6 +89,18 @@ module amba_axi4_read_address_channel
 	   cp_AR_SRC_DST_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(ARVALID, ARREADY, MAXWAIT))
 	     else $error ("Violation: ARREADY should be asserted within MAXWAIT cycles of ARVALID being asserted (AMBA recommended).");
 	end
+   endgenerate
+
+   generate
+      // Witnessing scenarios stated in the AMBA AXI4 spec
+      if (ENABLE_COVER) begin: witness
+	 wp_ARVALID_before_ARREADY: cover property (disable iff (!ARESETn) valid_before_ready(ARVALID, ARREADY))
+	   $info("Witnessed: Handshake process pA3-39, Figure A3-2 VALID before READY handshake capability.");
+	 wp_ARREADY_before_ARVALID: cover property (disable iff (!ARESETn) ready_before_valid(ARVALID, ARREADY))
+	   $info("Witnessed: Handshake process pA3-39, Figure A3-3 READY before VALID handshake capability.");
+	 wp_ARVALID_with_ARREADY: cover property (disable iff (!ARESETn) valid_with_ready(ARVALID, ARREADY))
+	   $info("Witnessed: Handshake process pA3-39, Figure A3-4 VALID with READY handshake capability.");
+      end
    endgenerate
 endmodule // amba_axi4_read_address_channel
 `default_nettype wire

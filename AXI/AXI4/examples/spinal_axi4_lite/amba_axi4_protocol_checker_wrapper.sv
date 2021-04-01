@@ -31,12 +31,12 @@ bind AxiLite4FormalComponent amba_axi4_protocol_checker
 	       .BVALID(io_bus_b_valid),
 	       .BREADY(io_bus_b_ready),
 	       .BRESP(io_bus_b_payload_resp),
-
+	       
 	       .ARVALID(io_bus_ar_valid),
 	       .ARREADY(io_bus_ar_ready),
 	       .ARADDR(io_bus_ar_payload_addr),
 	       .ARPROT(io_bus_ar_payload_prot),
-
+	       
 	       .RVALID(io_bus_r_valid),
 	       .RREADY(io_bus_r_ready),
 	       .RDATA(io_bus_r_payload_data),
