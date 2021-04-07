@@ -16,21 +16,36 @@
 `default_nettype none
 module amba_axi4_write_address_channel
   import amba_axi4_protocol_checker_pkg::*;
-   #(parameter unsigned     ADDRESS_WIDTH   = 32,
+   #(parameter unsigned     ID_WIDTH        = AMBA_AXI4_ID_WIDTH,
+     parameter unsigned     ADDRESS_WIDTH   = AMBA_AXI4_ADDRESS_WIDTH,
+     parameter unsigned     DATA_WIDTH      = AMBA_AXI4_DATA_WIDTH,
+     parameter unsigned     AWUSER_WIDTH    = AMBA_AXI4_AWUSER_WIDTH,
      parameter axi4_agent_t AGENT_TYPE      = SOURCE,
      parameter axi4_types_t PROTOCOL_TYPE   = AXI4LITE,
      parameter bit          CHECK_PARAMS    = 1,
      parameter bit          ENABLE_COVER    = 1,
      parameter bit          ENABLE_DEADLOCK = 1,
-     parameter unsigned     MAXWAIT         = 16)
+     parameter unsigned     MAXWAIT         = 16,
+     // Read only
+     localparam unsigned    STRB_WIDTH      = DATA_WIDTH/8)
    (input wire                     ACLK,
     input wire 			   ARESETn,
-    input wire 			   AWVALID,
-    input wire 			   AWREADY,
+    input wire [ID_WIDTH-1:0] 	   AWID,
     input wire [ADDRESS_WIDTH-1:0] AWADDR,
-    input wire [2:0] 		   AWPROT);
+    input wire [7:0] 		   AWLEN,
+    input wire [2:0] 		   AWSIZE,
+    input wire [1:0] 		   AWBURST,
+    input wire 			   AWLOCK,
+    input wire [3:0] 		   AWCACHE,
+    input wire [2:0] 		   AWPROT,
+    input wire [3:0] 		   AWQOS,
+    input wire [3:0] 		   AWREGION,
+    input wire [AWUSER_WIDTH-1:0]  AWUSER,
+    input wire 			   AWVALID,
+    input wire 			   AWREADY);
 
    // Import the properties in this scope
+   import definition_of_axi4_lite::*;
    import amba_axi4_single_interface_requirements::*;
    // Default clocking for all properties
    default clocking axi4_aclk @(posedge ACLK); endclocking
@@ -40,6 +55,64 @@ module amba_axi4_write_address_channel
       if (!ARESETn) first_point <= 1'b1;
       else          first_point <= 1'b0;
    end
+
+   /*		 ><><><><><><><><><><><><><><><><><><><><             *
+    *		 Section B1.1: Definition of AXI4-Lite                *
+    *		 ><><><><><><><><><><><><><><><><><><><><	      */
+   generate
+      if (PROTOCOL_TYPE == AXI4LITE) begin: axi4lite_defs
+	 // Guard correct AXI4-Lite DATA_WIDTH since the parameter is used here.
+	 if (CHECK_PARAMS) begin: check_dataw
+            ap_W_AXI4LITE_DATAWIDTH: assert property (axi4l_databus_width(DATA_WIDTH))
+              else $error("Violation: AXI4-Lite supports a data bus width of 32-bit or 64-bit",
+                          "(B.1 Definition of AXI4-Lite, pB1-126).");
+         end
+	 // Now configure or check unsupported AXI4-Lite signals
+	 logic AW_unsupported_sig;
+	 // "all transactions are of burst length 1".
+	 // "all data accesses use the full width of the data bus".
+	 // "AXI4-Lite supports a data bus width of 32-bit or 64-bit". (B1.1, pB1-126).
+	 // AXI4-Lite can have a burst size of either 4 (AWSIZE=3'b010) or 8 (AWSIZE=3'b011).
+	 // which is log2(STRB_WIDTH) [if WDATA = 32, STRB=32/8=4, log2(4)=2=AWSIZE of 3'b010.
+	 localparam MAX_SIZE = $clog2(STRB_WIDTH);
+	 assign AW_unsupported_sig = (/* The burst length is defined to be 1,
+				       * equivalent to an AxLEN value of zero. */
+				      AWLEN    == 8'b00000000 &&
+				      /* All accesses are defined to be the width
+				       * of the data bus. */
+				      AWSIZE   == MAX_SIZE &&
+				      /* The burst type has no meaning because the burst
+				       * length is 1. */
+				      AWBURST  == 2'b00 &&
+				      /* All accesses are defined as Normal accesses,
+				       * equivalent to an AxLOCK value of zero. */
+				      AWLOCK   == 1'b0 &&
+				      /* All accesses are defined as Non-modifiable,
+				       * Non-bufferable, equivalent to an AxCACHE
+				       * value of 0b0000. */
+				      AWCACHE  == 4'b0000 &&
+				      /* A default value of 0b0000 indicates that
+				       * the interface is not participating in any
+				       * QoS scheme. */
+				      AWQOS    == 4'b0000 &&
+				      /* Table A10-1 Master interface write channel
+				       * signals and default signal values.
+				       * AWREGION Default all zeros. */
+				      AWREGION == 4'b0000 &&
+				      /* Optional User-defined signal in the write address channel.
+				       Supported only in AXI4. */
+				      AWUSER   == {AWUSER_WIDTH{1'b0}} &&
+	                              /* AXI4-Lite does not support AXI IDs. This means
+	                               * all transactions must be in order, and all
+	                               * accesses use a single fixed ID value. */
+	                              AWID     == {ID_WIDTH{1'b0}});
+
+	 // Configure the AXI4-Lite checker unsupported signals.
+	 cp_AW_unsupported_axi4l: assume property(disable iff (!ARESETn) axi4_lite_unsupported_awsig(AW_unsupported_sig))
+	   else $error("Violation: For AW in AXI4-Lite, only signals described in B1.1 are",
+		       "required or supported (B1.1 Definition of AXI4-Lite, pB1-126).");
+      end
+   endgenerate
 
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
     *		 Chapter A3. Single Interface Requirements            *

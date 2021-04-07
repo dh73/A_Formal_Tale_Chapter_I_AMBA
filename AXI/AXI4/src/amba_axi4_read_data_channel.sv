@@ -16,19 +16,24 @@
 `default_nettype none
 module amba_axi4_read_data_channel
   import amba_axi4_protocol_checker_pkg::*;
-  #(parameter unsigned     DATA_WIDTH      = 32,
-    parameter axi4_agent_t AGENT_TYPE      = SOURCE,
-    parameter axi4_types_t PROTOCOL_TYPE   = AXI4LITE,
-    parameter bit          CHECK_PARAMS    = 1,
-    parameter bit          ENABLE_COVER    = 1,
-    parameter bit          ENABLE_DEADLOCK = 1,
-    parameter unsigned     MAXWAIT         = 16)
-   (input wire                  ACLK,
-    input wire 			ARESETn,
-    input wire 			RVALID,
-    input wire 			RREADY,
-    input wire [DATA_WIDTH-1:0] RDATA,
-    input wire [1:0]	        RRESP);
+   #(parameter unsigned     ID_WIDTH        = AMBA_AXI4_ID_WIDTH,
+     parameter unsigned     DATA_WIDTH      = AMBA_AXI4_DATA_WIDTH,
+     parameter unsigned     RUSER_WIDTH     = AMBA_AXI4_RUSER_WIDTH,
+     parameter axi4_agent_t AGENT_TYPE      = SOURCE,
+     parameter axi4_types_t PROTOCOL_TYPE   = AXI4LITE,
+     parameter bit          CHECK_PARAMS    = 1,
+     parameter bit          ENABLE_COVER    = 1,
+     parameter bit          ENABLE_DEADLOCK = 1,
+     parameter unsigned     MAXWAIT         = 16)
+   (input wire                   ACLK,
+    input wire 			 ARESETn,
+    input wire [ID_WIDTH-1:0] 	 RID,
+    input wire [DATA_WIDTH-1:0]  RDATA,
+    input wire [1:0] 		 RRESP,
+    input wire 			 RLAST,
+    input wire [RUSER_WIDTH-1:0] RUSER,
+    input wire 			 RVALID,
+    input wire 			 RREADY);
 
    // Import the properties in this scope
    import definition_of_axi4_lite::*;

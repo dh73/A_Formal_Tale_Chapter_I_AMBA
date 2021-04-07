@@ -16,16 +16,20 @@
 `default_nettype none
 module amba_axi4_write_response_channel
   import amba_axi4_protocol_checker_pkg::*;
-   #(parameter axi4_agent_t AGENT_TYPE      = SOURCE,
+   #(parameter unsigned     ID_WIDTH        = AMBA_AXI4_ID_WIDTH,
+     parameter unsigned     BUSER_WIDTH     = AMBA_AXI4_BUSER_WIDTH,
+     parameter axi4_agent_t AGENT_TYPE      = SOURCE,
      parameter axi4_types_t PROTOCOL_TYPE   = AXI4LITE,
      parameter bit          ENABLE_COVER    = 1,
      parameter bit          ENABLE_DEADLOCK = 1,
      parameter unsigned     MAXWAIT         = 16)
-   (input wire       ACLK,
-    input wire       ARESETn,
-    input wire       BVALID,
-    input wire       BREADY,
-    input wire [1:0] BRESP);
+   (input wire                   ACLK,
+    input wire 			 ARESETn,
+    input wire [ID_WIDTH-1:0] 	 BID,
+    input wire [1:0] 		 BRESP,
+    input wire [BUSER_WIDTH-1:0] BUSER,
+    input wire 			 BVALID,
+    input wire 			 BREADY);
 
    // Import the properties in this scope
    import definition_of_axi4_lite::*;
@@ -56,7 +60,7 @@ module amba_axi4_write_response_channel
 	 end
       end
    endgenerate
-   
+
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
     *		 Chapter A3. Single Interface Requirements            *
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
@@ -88,7 +92,7 @@ module amba_axi4_write_response_channel
 			"occurs (A3.2.1 Handshake process, pA3-39).");
       end // block: destination_properties
    endgenerate
-   
+
    // AMBA Recommended property for potential deadlock detection
    generate
       if (ENABLE_DEADLOCK)

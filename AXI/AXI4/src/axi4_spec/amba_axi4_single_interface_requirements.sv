@@ -145,10 +145,10 @@ package amba_axi4_single_interface_requirements;
     *   \|===|/	   		                                      *
     *    '---'							      */
    property rdwr_response_okay(valid, ready, resp);
-      (valid && ready && 
+      (valid && ready &&
        (resp == amba_axi4_protocol_checker_pkg::OKAY));
    endproperty // rdwr_response_okay
-   
+
    /* ,         ,                                                     *
     * |\\\\ ////|  "EXOKAY: Exclusive access okay. Indicates that     *
     * | \\\V/// |   either the read or write portion of an exclusive  *
@@ -160,7 +160,7 @@ package amba_axi4_single_interface_requirements;
     *   \|===|/	   		                                      *
     *    '---'							      */
    property rdwr_response_exokay (valid, ready, resp);
-      (valid && ready && 
+      (valid && ready &&
        (resp == amba_axi4_protocol_checker_pkg::EXOKAY));
    endproperty // rdwr_response_exokay
 
@@ -175,10 +175,10 @@ package amba_axi4_single_interface_requirements;
     *   \|===|/	   		                                      *
     *    '---'							      */
    property rdwr_response_slverr (valid, ready, resp);
-      (valid && ready && 
+      (valid && ready &&
        (resp == amba_axi4_protocol_checker_pkg::SLVERR));
    endproperty // rdwr_response_slverr
-   
+
    /* ,         ,                                                     *
     * |\\\\ ////|  "DECERR: Decode error. Generated, typically by an  *
     * | \\\V/// |   interconnect component, to indicate that there    *
@@ -190,7 +190,7 @@ package amba_axi4_single_interface_requirements;
     *   \|===|/	   		                                      *
     *    '---'							      */
    property rdwr_response_decerr (valid, ready, resp);
-      (valid && ready && 
+      (valid && ready &&
        (resp == amba_axi4_protocol_checker_pkg::DECERR));
    endproperty // rdwr_response_decerr
 endpackage // amba_axi4_single_interface_requirements

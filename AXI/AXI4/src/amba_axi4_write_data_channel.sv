@@ -17,6 +17,7 @@
 module amba_axi4_write_data_channel
   import amba_axi4_protocol_checker_pkg::*;
    #(parameter unsigned     DATA_WIDTH      = 32,
+     parameter unsigned     WUSER_WIDTH     = AMBA_AXI4_WUSER_WIDTH,
      parameter axi4_agent_t AGENT_TYPE      = SOURCE,
      parameter axi4_types_t PROTOCOL_TYPE   = AXI4LITE,
      parameter bit          CHECK_PARAMS    = 1,
@@ -24,15 +25,17 @@ module amba_axi4_write_data_channel
      parameter bit          ENABLE_DEADLOCK = 1,
      parameter unsigned     MAXWAIT         = 16,
      localparam             STRB_WIDTH      = DATA_WIDTH/8)
-   (input wire                  ACLK,
-    input wire 			ARESETn,
-    input wire 			WVALID,
-    input wire 			WREADY,
-    input wire [DATA_WIDTH-1:0] WDATA,
-    input wire [STRB_WIDTH-1:0] WSTRB);
+   (input wire                   ACLK,
+    input wire 			 ARESETn,
+    input wire [DATA_WIDTH-1:0]  WDATA,
+    input wire [STRB_WIDTH-1:0]  WSTRB,
+    input wire 			 WLAST,
+    input wire [WUSER_WIDTH-1:0] WUSER,
+    input wire 			 WVALID,
+    input wire 			 WREADY);
 
    // Import the properties in this scope
-   import definition_of_axi4_lite::*; 
+   import definition_of_axi4_lite::*;
    import amba_axi4_single_interface_requirements::*;
    // Default clocking for all properties
    default clocking axi4_aclk @(posedge ACLK); endclocking

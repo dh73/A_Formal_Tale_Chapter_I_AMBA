@@ -16,20 +16,32 @@
 `default_nettype none
 module amba_axi4_read_address_channel
   import amba_axi4_protocol_checker_pkg::*;
-   #(parameter ADDRESS_WIDTH   = 32,
-     parameter AGENT_TYPE      = SOURCE,
-     parameter PROTOCOL_TYPE   = AXI4LITE,
-     parameter ENABLE_COVER    = 1,
-     parameter ENABLE_DEADLOCK = 1,
-     parameter MAXWAIT         = 16)
+   #(parameter unsigned     ID_WIDTH        = AMBA_AXI4_ID_WIDTH,
+     parameter unsigned     ADDRESS_WIDTH   = AMBA_AXI4_ADDRESS_WIDTH,
+     parameter unsigned     ARUSER_WIDTH    = AMBA_AXI4_ARUSER_WIDTH,
+     parameter axi4_agent_t AGENT_TYPE      = SOURCE,
+     parameter axi4_types_t PROTOCOL_TYPE   = AXI4LITE,
+     parameter bit          ENABLE_COVER    = 1,
+     parameter bit          ENABLE_DEADLOCK = 1,
+     parameter unsigned     MAXWAIT         = 16)
    (input wire                     ACLK,
     input wire 			   ARESETn,
-    input wire 			   ARVALID,
-    input wire 			   ARREADY,
+    input wire [ID_WIDTH-1:0] 	   ARID,
     input wire [ADDRESS_WIDTH-1:0] ARADDR,
-    input wire [2:0] 		   ARPROT);
+    input wire [7:0] 		   ARLEN,
+    input wire [2:0] 		   ARSIZE,
+    input wire [1:0] 		   ARBURST,
+    input wire 			   ARLOCK,
+    input wire [3:0] 		   ARCACHE,
+    input wire [2:0] 		   ARPROT,
+    input wire [3:0] 		   ARQOS,
+    input wire [3:0] 		   ARREGION,
+    input wire [ARUSER_WIDTH-1:0]  ARUSER,
+    input wire 			   ARVALID,
+    input wire 			   ARREADY);
 
    // Import the properties in this scope
+   import definition_of_axi4_lite::*;
    import amba_axi4_single_interface_requirements::*;
    // Default clocking for all properties
    default clocking axi4_aclk @(posedge ACLK); endclocking
@@ -39,6 +51,24 @@ module amba_axi4_read_address_channel
       if (!ARESETn) first_point <= 1'b1;
       else          first_point <= 1'b0;
    end
+
+   /*            ><><><><><><><><><><><><><><><><><><><><             *
+    *            Section B1.1: Definition of AXI4-Lite                *
+    *            ><><><><><><><><><><><><><><><><><><><><             */
+   generate
+      if (PROTOCOL_TYPE == AXI4LITE) begin: axi4lite_defs
+         if (AGENT_TYPE == DESTINATION || AGENT_TYPE == MONITOR) begin: a_exclusive_responses
+            ap_AR_UNSUPPORTED_EXCLUSIVE: assert property(disable iff (!ARESETn) unsupported_exclusive_access(ARVALID, ARLOCK, EXCLUSIVE))
+              else $error("Violation: Exclusive read accesses are not supported in AXI4 Lite",
+                          "(Definition of AXI4-Lite, pB1-126).");
+         end
+         else if (AGENT_TYPE == SOURCE || AGENT_TYPE == CONSTRAINT) begin: c_exclusive_responses
+            cp_AR_UNSUPPORTED_EXCLUSIVE: assume property(disable iff (!ARESETn) unsupported_exclusive_access(ARVALID, ARLOCK, EXCLUSIVE))
+              else $error("Violation: Exclusive read accesses are not supported in AXI4 Lite",
+                          "(Definition of AXI4-Lite, pB1-126).");
+         end
+      end
+   endgenerate
 
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
     *		 Chapter A3. Single Interface Requirements            *

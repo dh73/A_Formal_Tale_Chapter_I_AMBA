@@ -34,7 +34,21 @@ package definition_of_axi4_lite;
    property axi4l_databus_width(data_width);
       data_width inside {32, 64};
    endproperty // exit_from_reset
-   
+
+   /* ,         ,                                                     *
+    * |\\\\ ////|  "Exclusive accesses are not supported".            *
+    * | \\\V/// |   Ref: B1.1 Definition of AXI4-Lite, pB1-126.       *
+    * |	 |~~~|	|                                                     *
+    * |	 |===|	|                                                     *
+    * |	 |A  |	|                                                     *
+    * |	 | X |	|						      *
+    *  \ |  I| /						      *
+    *	\|===|/							      *
+    *	 '---'							      */
+   property unsupported_exclusive_access(valid, lock, value);
+      valid |-> lock != value;
+   endproperty // unsupported_exclusive_access
+
    /* ,         ,                                                     *
     * |\\\\ ////|  "The EXOKAY response is not supported on the read  *
     * | \\\V/// |   data and write response channels".                *
@@ -48,5 +62,19 @@ package definition_of_axi4_lite;
    property unsupported_transfer_status(valid, response, value);
       valid |-> response != value;
    endproperty // unsupported_transfer_status
+
+   /* ,         ,                                                     *
+    * |\\\\ ////|  "Table B1-1 shows the required signals on an       *
+    * | \\\V/// |   AXI4-Lite interface".                             *
+    * |	 |~~~|	|   Ref: B1.1.1 Signal List, pB1-126.                 *
+    * |	 |===|	|   Including:                                        *
+    * |	 |A  |	|   AXI4 signals modified in AXI4-Lite,               *
+    * |	 | X |	|   AXI4 signals not supported in AXI4-Lite           *
+    *  \ |  I| /    B1.1.2 Bus width,				      *
+    *	\|===|/	    B1.1.3 Write strobes,    		              *
+    *	 '---'      B1.1.4 Optional signaling.			      */
+   property axi4_lite_unsupported_awsig(axi4_lite_aw_bundle);
+      axi4_lite_aw_bundle;
+   endproperty // axi4_lite_unsupported_awsig
 endpackage // definition_of_axi4_lite
 `endif //  `ifndef __DEFINITION_OF_AXI4_LITE__
