@@ -59,6 +59,19 @@ module amba_axi4_write_data_channel
 	      else $error("Violation: AXI4-Lite supports a data bus width of 32-bit or 64-bit",
 			  "(B.1 Definition of AXI4-Lite, pB1-126).");
 	 end
+	 // Now configure unsupported AXI4-Lite signals
+	 logic W_unsupported_sig;
+	 assign W_unsupported_sig = (/* All bursts are defined to be of length 1,
+				      * equivalent to a WLAST or RLAST value of 1. */
+				     WLAST  == 1'b1 &&
+				     /* Optional User-defined signal in the write address channel.
+				      * Supported only in AXI4. */
+				     WUSER   == {WUSER_WIDTH{1'b0}});
+
+	 // Configure the AXI4-Lite checker unsupported signals.
+	 cp_W_unsupported_axi4l: assume property(disable iff (!ARESETn) axi4_lite_unsupported_sig(W_unsupported_sig))
+	   else $error("Violation: For W in AXI4-Lite, only signals described in B1.1 are",
+		       "required or supported (B1.1 Definition of AXI4-Lite, pB1-126).");
       end
    endgenerate
 

@@ -1,0 +1,22 @@
+[options]
+mode bmc
+
+[engines]
+smtbmc
+
+[script]
+# Read packages first
+read -sv amba_axi4_protocol_checker_pkg.sv
+read -sv amba_axi4_single_interface_requirements.sv
+read -sv definition_of_axi4_lite.sv
+
+# Then the IP
+read -incdir ../../../../src
+read -sv top_cell.sv
+prep -top amba_axi4_protocol_checker
+
+[files]
+top_cell.sv
+../../src/amba_axi4_protocol_checker_pkg.sv
+../../src/axi4_spec/amba_axi4_single_interface_requirements.sv
+../../src/axi4_spec/definition_of_axi4_lite.sv

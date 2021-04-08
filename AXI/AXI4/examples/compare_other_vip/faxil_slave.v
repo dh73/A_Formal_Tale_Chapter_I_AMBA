@@ -68,22 +68,22 @@ module faxil_slave #(
 	// Likewise, when F_OPT_ASYNC_RESET is set, the reset assertions are
 	// applied *on the same clock cycle*, in addition to one cycle later.
 	parameter [0:0]			F_OPT_ASYNC_RESET = 1'b0,
-	parameter 			F_OPT_COVER_BURST = 0,
+	parameter 			F_OPT_COVER_BURST = 1,
 	// F_LGDEPTH is the number of bits necessary to count the maximum
 	// number of items in flight.
 	parameter			F_LGDEPTH	= 4,
 	// F_AXI_MAXWAIT is the maximum number of clock cycles the
 	// master should have to wait for a slave to raise its ready flag to
 	// accept a request.  Set to zero for no limit.
-	parameter			F_AXI_MAXWAIT  = 12,
+	parameter			F_AXI_MAXWAIT  = 16,
 	// F_AXI_MAXRSTALL is the maximum number of clock cycles the
 	// slave should have to wait with a return valid signal high, but
 	// while the master's return ready signal is low.  Set to zero for no
 	// limit.
-	parameter			F_AXI_MAXRSTALL= 12,
+	parameter			F_AXI_MAXRSTALL= 16,
 	// F_AXI_MAXDELAY is the maximum number of clock cycles between request
 	// and response within the slave.  Set this to zero for no limit.
-	parameter			F_AXI_MAXDELAY = 12,
+	parameter			F_AXI_MAXDELAY = 16,
 	//
 	parameter [0:0]			F_OPT_INITIAL = 1'b1,
 

@@ -25,8 +25,8 @@ module faxil_slave_master
     // existence of a correct reset, rather than asserting it.  It is
     // appropriate anytime the reset logic is outside of the circuit being
     // examined
-    parameter [0:0]			F_OPT_ASSUME_RESET = 1'b0,
-    parameter [0:0]			F_OPT_NO_RESET = 1'b0,
+    parameter [0:0]			F_OPT_ASSUME_RESET = 1'b1,
+    parameter [0:0]			F_OPT_NO_RESET = 1'b1,
     //
     // F_OPT_ASYNC_RESET is for those designs that will reset the channels
     // using an asynchronous reset.  In these cases, the stability

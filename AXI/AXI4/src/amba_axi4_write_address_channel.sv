@@ -67,7 +67,7 @@ module amba_axi4_write_address_channel
               else $error("Violation: AXI4-Lite supports a data bus width of 32-bit or 64-bit",
                           "(B.1 Definition of AXI4-Lite, pB1-126).");
          end
-	 // Now configure or check unsupported AXI4-Lite signals
+	 // Now configure unsupported AXI4-Lite signals
 	 logic AW_unsupported_sig;
 	 // "all transactions are of burst length 1".
 	 // "all data accesses use the full width of the data bus".
@@ -100,7 +100,7 @@ module amba_axi4_write_address_channel
 				       * AWREGION Default all zeros. */
 				      AWREGION == 4'b0000 &&
 				      /* Optional User-defined signal in the write address channel.
-				       Supported only in AXI4. */
+				       * Supported only in AXI4. */
 				      AWUSER   == {AWUSER_WIDTH{1'b0}} &&
 	                              /* AXI4-Lite does not support AXI IDs. This means
 	                               * all transactions must be in order, and all
@@ -108,9 +108,20 @@ module amba_axi4_write_address_channel
 	                              AWID     == {ID_WIDTH{1'b0}});
 
 	 // Configure the AXI4-Lite checker unsupported signals.
-	 cp_AW_unsupported_axi4l: assume property(disable iff (!ARESETn) axi4_lite_unsupported_awsig(AW_unsupported_sig))
+	 cp_AW_unsupported_axi4l: assume property(disable iff (!ARESETn) axi4_lite_unsupported_sig(AW_unsupported_sig))
 	   else $error("Violation: For AW in AXI4-Lite, only signals described in B1.1 are",
 		       "required or supported (B1.1 Definition of AXI4-Lite, pB1-126).");
+
+	 if (AGENT_TYPE == DESTINATION || AGENT_TYPE == MONITOR) begin: a_exclusive_responses
+            ap_AW_UNSUPPORTED_EXCLUSIVE: assert property(disable iff (!ARESETn) unsupported_exclusive_access(AWVALID, AWLOCK, EXCLUSIVE))
+              else $error("Violation: Exclusive read accesses are not supported in AXI4 Lite",
+                          "(Definition of AXI4-Lite, pB1-126).");
+         end
+         else if (AGENT_TYPE == SOURCE || AGENT_TYPE == CONSTRAINT) begin: c_exclusive_responses
+            cp_AW_UNSUPPORTED_EXCLUSIVE: assume property(disable iff (!ARESETn) unsupported_exclusive_access(AWVALID, AWLOCK, EXCLUSIVE))
+              else $error("Violation: Exclusive read accesses are not supported in AXI4 Lite",
+                          "(Definition of AXI4-Lite, pB1-126).");
+         end
       end
    endgenerate
 

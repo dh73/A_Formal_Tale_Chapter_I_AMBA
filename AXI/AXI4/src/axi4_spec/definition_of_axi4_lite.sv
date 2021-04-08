@@ -73,8 +73,8 @@ package definition_of_axi4_lite;
     *  \ |  I| /    B1.1.2 Bus width,				      *
     *	\|===|/	    B1.1.3 Write strobes,    		              *
     *	 '---'      B1.1.4 Optional signaling.			      */
-   property axi4_lite_unsupported_awsig(axi4_lite_aw_bundle);
-      axi4_lite_aw_bundle;
-   endproperty // axi4_lite_unsupported_awsig
+   property axi4_lite_unsupported_sig(axi4_lite_sig_bundle);
+      axi4_lite_sig_bundle;
+   endproperty // axi4_lite_unsupported_sig
 endpackage // definition_of_axi4_lite
 `endif //  `ifndef __DEFINITION_OF_AXI4_LITE__

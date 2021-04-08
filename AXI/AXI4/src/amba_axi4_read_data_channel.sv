@@ -57,6 +57,25 @@ module amba_axi4_read_data_channel
 	      else $error("Violation: AXI4-Lite supports a data bus width of 32-bit or 64-bit",
 			  "(B.1 Definition of AXI4-Lite, pB1-126).");
 	 end
+	 
+	 // Now configure unsupported AXI4-Lite signals
+	 logic R_unsupported_sig;
+	 assign R_unsupported_sig = (/* All bursts are defined to be of length 1, 
+				      * equivalent to a WLAST or RLAST value of 1. */
+				     RLAST == 1'b1 &&
+				     /* Optional User-defined signal in the write address channel.
+				      * Supported only in AXI4. */
+				     RUSER == {RUSER_WIDTH{1'b0}} &&
+				     /* AXI4-Lite does not support AXI IDs. This means
+	                              * all transactions must be in order, and all
+	                              * accesses use a single fixed ID value. */
+				     RID == {ID_WIDTH{1'b0}});
+	 
+         // Configure the AXI4-Lite checker unsupported signals.
+	 cp_R_unsupported_axi4l: assume property(disable iff (!ARESETn) axi4_lite_unsupported_sig(R_unsupported_sig))
+	   else $error("Violation: For R in AXI4-Lite, only signals described in B1.1 are",
+		       "required or supported (B1.1 Definition of AXI4-Lite, pB1-126).");
+	 
 	 if (AGENT_TYPE == DESTINATION || AGENT_TYPE == MONITOR) begin: a_exclusive_responses
 	    ap_R_UNSUPPORTED_RESPONSE: assert property(disable iff (!ARESETn) unsupported_transfer_status(RVALID, RRESP, EXOKAY))
 	      else $error("Violation: The EXOKAY response is not supported on the read data",

@@ -48,6 +48,21 @@ module amba_axi4_write_response_channel
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
    generate
       if (PROTOCOL_TYPE == AXI4LITE) begin: axi4lite_defs
+	 // Now configure unsupported AXI4-Lite signals
+	 logic B_unsupported_sig;
+	 assign B_unsupported_sig = (/* Optional User-defined signal in the write address channel.
+				      * Supported only in AXI4. */
+				     BUSER   == {BUSER_WIDTH{1'b0}} &&
+				     /* AXI4-Lite does not support AXI IDs. This means
+	                              * all transactions must be in order, and all
+	                              * accesses use a single fixed ID value. */
+	                             BID     == {ID_WIDTH{1'b0}});
+	 
+	 // Configure the AXI4-Lite checker unsupported signals.
+	 cp_B_unsupported_axi4l: assume property(disable iff (!ARESETn) axi4_lite_unsupported_sig(B_unsupported_sig))
+	   else $error("Violation: For B in AXI4-Lite, only signals described in B1.1 are",
+		       "required or supported (B1.1 Definition of AXI4-Lite, pB1-126).");
+	 
 	 if (AGENT_TYPE == DESTINATION || AGENT_TYPE == MONITOR) begin: a_exclusive_responses
 	    ap_B_UNSUPPORTED_RESPONSE: assert property(disable iff (!ARESETn) unsupported_transfer_status(BVALID, BRESP, EXOKAY))
 	      else $error("Violation: The EXOKAY response is not supported on the read data",

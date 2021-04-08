@@ -18,12 +18,15 @@ module amba_axi4_read_address_channel
   import amba_axi4_protocol_checker_pkg::*;
    #(parameter unsigned     ID_WIDTH        = AMBA_AXI4_ID_WIDTH,
      parameter unsigned     ADDRESS_WIDTH   = AMBA_AXI4_ADDRESS_WIDTH,
+     parameter unsigned     DATA_WIDTH      = AMBA_AXI4_DATA_WIDTH,
      parameter unsigned     ARUSER_WIDTH    = AMBA_AXI4_ARUSER_WIDTH,
      parameter axi4_agent_t AGENT_TYPE      = SOURCE,
      parameter axi4_types_t PROTOCOL_TYPE   = AXI4LITE,
      parameter bit          ENABLE_COVER    = 1,
      parameter bit          ENABLE_DEADLOCK = 1,
-     parameter unsigned     MAXWAIT         = 16)
+     parameter unsigned     MAXWAIT         = 16,
+     // Read only
+     localparam unsigned    STRB_WIDTH      = DATA_WIDTH/8)
    (input wire                     ACLK,
     input wire 			   ARESETn,
     input wire [ID_WIDTH-1:0] 	   ARID,
@@ -57,6 +60,47 @@ module amba_axi4_read_address_channel
     *            ><><><><><><><><><><><><><><><><><><><><             */
    generate
       if (PROTOCOL_TYPE == AXI4LITE) begin: axi4lite_defs
+	 // AXI4-Lite can have a burst size of either 4 (AWSIZE=3'b010) or 8 (AWSIZE=3'b011).
+	 // which is log2(STRB_WIDTH) [if WDATA = 32, STRB=32/8=4, log2(4)=2=AWSIZE of 3'b010.
+	 localparam MAX_SIZE = $clog2(STRB_WIDTH); // TODO, guard DW
+	 logic AR_unsupported_sig;
+	 assign AR_unsupported_sig = (/* The burst length is defined to be 1,
+				       * equivalent to an AxLEN value of zero. */
+				      ARLEN    == 8'b00000000 &&
+				      /* All accesses are defined to be the width
+				       * of the data bus. */
+				      ARSIZE   == MAX_SIZE &&
+				      /* The burst type has no meaning because the burst
+				       * length is 1. */
+				      ARBURST  == 2'b00 &&
+				      /* All accesses are defined as Normal accesses,
+				       * equivalent to an AxLOCK value of zero. */
+				      ARLOCK   == 1'b0 &&
+				      /* All accesses are defined as Non-modifiable,
+				       * Non-bufferable, equivalent to an AxCACHE
+				       * value of 0b0000. */
+				      ARCACHE  == 4'b0000 &&
+				      /* A default value of 0b0000 indicates that
+				       * the interface is not participating in any
+				       * QoS scheme. */
+				      ARQOS    == 4'b0000 &&
+				      /* Table A10-1 Master interface write channel
+				       * signals and default signal values.
+				       * AWREGION Default all zeros. */
+				      ARREGION == 4'b0000 &&
+				      /* Optional User-defined signal in the write address channel.
+				       * Supported only in AXI4. */
+				      ARUSER   == {ARUSER_WIDTH{1'b0}} &&
+	                              /* AXI4-Lite does not support AXI IDs. This means
+	                               * all transactions must be in order, and all
+	                               * accesses use a single fixed ID value. */
+	                              ARID     == {ID_WIDTH{1'b0}});
+	 
+	 // Configure the AXI4-Lite checker unsupported signals.
+	 cp_AR_unsupported_axi4l: assume property(disable iff (!ARESETn) axi4_lite_unsupported_sig(AR_unsupported_sig))
+	   else $error("Violation: For AR in AXI4-Lite, only signals described in B1.1 are",
+		       "required or supported (B1.1 Definition of AXI4-Lite, pB1-126).");
+	 
          if (AGENT_TYPE == DESTINATION || AGENT_TYPE == MONITOR) begin: a_exclusive_responses
             ap_AR_UNSUPPORTED_EXCLUSIVE: assert property(disable iff (!ARESETn) unsupported_exclusive_access(ARVALID, ARLOCK, EXCLUSIVE))
               else $error("Violation: Exclusive read accesses are not supported in AXI4 Lite",
