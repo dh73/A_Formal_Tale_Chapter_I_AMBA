@@ -186,6 +186,12 @@ module amba_axi4_write_address_channel
 	   $info("Witnessed: Handshake process pA3-39, Figure A3-3 READY before VALID handshake capability.");
 	 wp_AWVALID_with_AWREADY: cover property (disable iff (!ARESETn) valid_with_ready(AWVALID, AWREADY))
 	   $info("Witnessed: Handshake process pA3-39, Figure A3-4 VALID with READY handshake capability.");
+	 wp_AW_B2B: cover property(disable iff(!ARESETn) axi4_back_to_back(AWVALID, AWREADY))
+	   $info("Witnessed: Back to back transaction on AW channel.");
+	 wp_AW_WAIT: cover property(disable iff(!ARESETn) axi4_wait_state(AWVALID, AWREADY))
+	   $info("Witnessed: Wait state during transaction on AW channel.");
+	 wp_AW_NO_WAIT: cover property(disable iff(!ARESETn) axi4_no_wait_state(AWVALID, AWREADY))
+	   $info("Witnessed: No wait states during transaction on AW channel.");
       end
    endgenerate
 

@@ -193,5 +193,20 @@ package amba_axi4_single_interface_requirements;
       (valid && ready &&
        (resp == amba_axi4_protocol_checker_pkg::DECERR));
    endproperty // rdwr_response_decerr
+
+   // This covers are not in the spec but gives some
+   // easy to get performance information
+   property axi4_back_to_back(valid, ready);
+      valid && ready ##1 valid;
+   endproperty // axi4_back_to_back
+
+   property axi4_wait_state(valid, ready);
+      valid && !ready ##1 ready;
+   endproperty // axi4_wait_state
+
+   property axi4_no_wait_state(valid, ready);
+      !valid || ready ##1 valid && ready;
+   endproperty // axi4_no_wait_state
+   
 endpackage // amba_axi4_single_interface_requirements
 `endif

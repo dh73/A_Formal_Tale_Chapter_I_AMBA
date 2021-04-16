@@ -106,6 +106,7 @@ module amba_axi4_protocol_checker
     * In other words, the user can bind this module to excercise the
     * AXI channels at once, or take any of the modules instantiated
     * here to verify a channel in particular. */
+   
    // Write addres channel properties
    amba_axi4_write_address_channel
      #(.ID_WIDTH(ID_WIDTH),
@@ -167,5 +168,6 @@ module amba_axi4_protocol_checker
        .ENABLE_DEADLOCK(ENABLE_DEADLOCK),
        .MAXWAIT(MAXWAIT))
    R_channel_checker(.*);
+
 endmodule // amba_axi4_protocol_checker
 `default_nettype wire
