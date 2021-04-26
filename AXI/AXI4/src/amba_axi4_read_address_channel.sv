@@ -16,32 +16,34 @@
 `default_nettype none
 module amba_axi4_read_address_channel
   import amba_axi4_protocol_checker_pkg::*;
-   #(parameter unsigned     ID_WIDTH        = AMBA_AXI4_ID_WIDTH,
-     parameter unsigned     ADDRESS_WIDTH   = AMBA_AXI4_ADDRESS_WIDTH,
-     parameter unsigned     DATA_WIDTH      = AMBA_AXI4_DATA_WIDTH,
-     parameter unsigned     ARUSER_WIDTH    = AMBA_AXI4_ARUSER_WIDTH,
-     parameter axi4_agent_t AGENT_TYPE      = SOURCE,
-     parameter axi4_types_t PROTOCOL_TYPE   = AXI4LITE,
-     parameter bit          ENABLE_COVER    = 1,
-     parameter bit          ENABLE_DEADLOCK = 1,
-     parameter unsigned     MAXWAIT         = 16,
+   #(parameter axi4_checker_params_t cfg =
+     '{ID_WIDTH:        4,
+       ADDRESS_WIDTH:   32,
+       DATA_WIDTH:      32,
+       ARUSER_WIDTH:    32,
+       AGENT_TYPE:      SOURCE,
+       PROTOCOL_TYPE:   AXI4LITE,
+       ENABLE_COVER:    1,
+       ARM_RECOMMENDED: 1,
+       MAXWAIT:         16,
+       default:         0},
      // Read only
-     localparam unsigned    STRB_WIDTH      = DATA_WIDTH/8)
-   (input wire                     ACLK,
-    input wire 			   ARESETn,
-    input wire [ID_WIDTH-1:0] 	   ARID,
-    input wire [ADDRESS_WIDTH-1:0] ARADDR,
-    input wire [7:0] 		   ARLEN,
-    input wire [2:0] 		   ARSIZE,
-    input wire [1:0] 		   ARBURST,
-    input wire 			   ARLOCK,
-    input wire [3:0] 		   ARCACHE,
-    input wire [2:0] 		   ARPROT,
-    input wire [3:0] 		   ARQOS,
-    input wire [3:0] 		   ARREGION,
-    input wire [ARUSER_WIDTH-1:0]  ARUSER,
-    input wire 			   ARVALID,
-    input wire 			   ARREADY);
+     localparam unsigned STRB_WIDTH = cfg.DATA_WIDTH/8)
+   (input wire                         ACLK,
+    input wire 			       ARESETn,
+    input wire [cfg.ID_WIDTH-1:0]      ARID,
+    input wire [cfg.ADDRESS_WIDTH-1:0] ARADDR,
+    input wire [7:0] 		       ARLEN,
+    input wire [2:0] 		       ARSIZE,
+    input wire [1:0] 		       ARBURST,
+    input wire 			       ARLOCK,
+    input wire [3:0] 		       ARCACHE,
+    input wire [2:0] 		       ARPROT,
+    input wire [3:0] 		       ARQOS,
+    input wire [3:0] 		       ARREGION,
+    input wire [cfg.ARUSER_WIDTH-1:0]  ARUSER,
+    input wire 			       ARVALID,
+    input wire 			       ARREADY);
 
    // Import the properties in this scope
    import definition_of_axi4_lite::*;
@@ -49,17 +51,11 @@ module amba_axi4_read_address_channel
    // Default clocking for all properties
    default clocking axi4_aclk @(posedge ACLK); endclocking
 
-   logic first_point;
-   always_ff @(posedge ACLK) begin
-      if (!ARESETn) first_point <= 1'b1;
-      else          first_point <= 1'b0;
-   end
-
    /*            ><><><><><><><><><><><><><><><><><><><><             *
     *            Section B1.1: Definition of AXI4-Lite                *
     *            ><><><><><><><><><><><><><><><><><><><><             */
    generate
-      if (PROTOCOL_TYPE == AXI4LITE) begin: axi4lite_defs
+      if (cfg.PROTOCOL_TYPE == AXI4LITE) begin: axi4lite_defs
 	 // AXI4-Lite can have a burst size of either 4 (AWSIZE=3'b010) or 8 (AWSIZE=3'b011).
 	 // which is log2(STRB_WIDTH) [if WDATA = 32, STRB=32/8=4, log2(4)=2=AWSIZE of 3'b010.
 	 localparam MAX_SIZE = $clog2(STRB_WIDTH); // TODO, guard DW
@@ -90,23 +86,23 @@ module amba_axi4_read_address_channel
 				      ARREGION == 4'b0000 &&
 				      /* Optional User-defined signal in the write address channel.
 				       * Supported only in AXI4. */
-				      ARUSER   == {ARUSER_WIDTH{1'b0}} &&
+				      ARUSER   == {cfg.ARUSER_WIDTH{1'b0}} &&
 	                              /* AXI4-Lite does not support AXI IDs. This means
 	                               * all transactions must be in order, and all
 	                               * accesses use a single fixed ID value. */
-	                              ARID     == {ID_WIDTH{1'b0}});
-	 
+	                              ARID     == {cfg.ID_WIDTH{1'b0}});
+
 	 // Configure the AXI4-Lite checker unsupported signals.
 	 cp_AR_unsupported_axi4l: assume property(disable iff (!ARESETn) axi4_lite_unsupported_sig(AR_unsupported_sig))
 	   else $error("Violation: For AR in AXI4-Lite, only signals described in B1.1 are",
 		       "required or supported (B1.1 Definition of AXI4-Lite, pB1-126).");
-	 
-         if (AGENT_TYPE == DESTINATION || AGENT_TYPE == MONITOR) begin: a_exclusive_responses
+
+         if (cfg.AGENT_TYPE == DESTINATION || cfg.AGENT_TYPE == MONITOR) begin: a_exclusive_responses
             ap_AR_UNSUPPORTED_EXCLUSIVE: assert property(disable iff (!ARESETn) unsupported_exclusive_access(ARVALID, ARLOCK, EXCLUSIVE))
               else $error("Violation: Exclusive read accesses are not supported in AXI4 Lite",
                           "(Definition of AXI4-Lite, pB1-126).");
          end
-         else if (AGENT_TYPE == SOURCE || AGENT_TYPE == CONSTRAINT) begin: c_exclusive_responses
+         else if (cfg.AGENT_TYPE == SOURCE || cfg.AGENT_TYPE == CONSTRAINT) begin: c_exclusive_responses
             cp_AR_UNSUPPORTED_EXCLUSIVE: assume property(disable iff (!ARESETn) unsupported_exclusive_access(ARVALID, ARLOCK, EXCLUSIVE))
               else $error("Violation: Exclusive read accesses are not supported in AXI4 Lite",
                           "(Definition of AXI4-Lite, pB1-126).");
@@ -118,9 +114,9 @@ module amba_axi4_read_address_channel
     *		 Chapter A3. Single Interface Requirements            *
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
    generate
-      if (AGENT_TYPE == SOURCE || AGENT_TYPE == MONITOR) begin: source_properties
+      if (cfg.AGENT_TYPE == SOURCE || cfg.AGENT_TYPE == MONITOR) begin: source_properties
 	 // Section A3.1.2: Reset
-	 ap_AR_SRC_DST_EXIT_RESET: assert property (exit_from_reset(ARESETn, first_point, ARVALID))
+	 ap_AR_SRC_DST_EXIT_RESET: assert property (exit_from_reset(ARESETn, ARVALID))
 	   else $error ("Violation: ARVALID must be low for the first clock edge",
 			"after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
 	 // Section A3.2.1: Handshake process
@@ -135,9 +131,9 @@ module amba_axi4_read_address_channel
 			"occurs  (A3.2.1 Handshake process, pA3-39).");
       end // block: source_properties
 
-      else if (AGENT_TYPE == DESTINATION || AGENT_TYPE == CONSTRAINT) begin: destination_properties
+      else if (cfg.AGENT_TYPE == DESTINATION || cfg.AGENT_TYPE == CONSTRAINT) begin: destination_properties
 	 // Section A3.1.2: Reset
-	 cp_AR_DST_SRC_EXIT_RESET: assume property (exit_from_reset(ARESETn, first_point, ARVALID))
+	 cp_AR_DST_SRC_EXIT_RESET: assume property (exit_from_reset(ARESETn, ARVALID))
 	   else $error ("Violation: ARVALID must be low for the first clock edge after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
 	 // Section A3.2.1: Handshake process
 	 cp_AR_DST_SRC_STABLE_AWPROT: assume property (disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARPROT))
@@ -154,20 +150,20 @@ module amba_axi4_read_address_channel
 
    // AMBA Recommended property for potential deadlock detection
    generate
-      if (ENABLE_DEADLOCK)
-	if (AGENT_TYPE == DESTINATION || AGENT_TYPE == MONITOR) begin: deadlock_check
-	   ap_AR_DST_SRC_READY_MAXWAIT: assert property (disable iff (!ARESETn) handshake_max_wait(ARVALID, ARREADY, MAXWAIT))
+      if (cfg.ARM_RECOMMENDED)
+	if (cfg.AGENT_TYPE == DESTINATION || cfg.AGENT_TYPE == MONITOR) begin: deadlock_check
+	   ap_AR_DST_SRC_READY_MAXWAIT: assert property (disable iff (!ARESETn) handshake_max_wait(ARVALID, ARREADY, cfg.MAXWAIT))
 	     else $error ("Violation: ARREADY should be asserted within MAXWAIT cycles of ARVALID being asserted (AMBA recommended.");
 	end
-	else if (AGENT_TYPE == SOURCE || AGENT_TYPE == CONSTRAINT) begin: deadlock_cons
-	   cp_AR_SRC_DST_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(ARVALID, ARREADY, MAXWAIT))
+	else if (cfg.AGENT_TYPE == SOURCE || cfg.AGENT_TYPE == CONSTRAINT) begin: deadlock_cons
+	   cp_AR_SRC_DST_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(ARVALID, ARREADY, cfg.MAXWAIT))
 	     else $error ("Violation: ARREADY should be asserted within MAXWAIT cycles of ARVALID being asserted (AMBA recommended).");
 	end
    endgenerate
 
    generate
       // Witnessing scenarios stated in the AMBA AXI4 spec
-      if (ENABLE_COVER) begin: witness
+      if (cfg.ENABLE_COVER == 1) begin: witness
 	 wp_ARVALID_before_ARREADY: cover property (disable iff (!ARESETn) valid_before_ready(ARVALID, ARREADY))
 	   $info("Witnessed: Handshake process pA3-39, Figure A3-2 VALID before READY handshake capability.");
 	 wp_ARREADY_before_ARVALID: cover property (disable iff (!ARESETn) ready_before_valid(ARVALID, ARREADY))

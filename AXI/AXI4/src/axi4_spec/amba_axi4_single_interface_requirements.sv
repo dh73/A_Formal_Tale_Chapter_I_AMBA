@@ -31,8 +31,8 @@ package amba_axi4_single_interface_requirements;
     *  \ |  I| /						      *
     *	\|===|/							      *
     *	 '---'							      */
-   property exit_from_reset(aresetn, ep, valid);
-      (!aresetn || ep) |-> !valid;
+   property exit_from_reset(aresetn, valid);
+      (!aresetn || $rose(aresetn)) |-> !valid;
    endproperty // exit_from_reset
 
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
