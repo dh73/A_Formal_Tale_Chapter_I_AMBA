@@ -148,7 +148,7 @@ package amba_axi4_single_interface_requirements;
     *  \ |  I| /     signals if it always perform full data bus width *
     *   \|===|/	     transactions. The default value for wr strobes   *
     *    '---'	     is all signals asserted". A10.3.4, pA10-121.     */
-   property full_data_transaction(valid, defaul_strb_value);
+   property full_data_transaction(valid, default_strb_value);
       valid |-> default_strb_value;
    endproperty // full_data_transaction
 

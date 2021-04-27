@@ -35,7 +35,7 @@ module amba_axi4_write_response_channel
     input wire 			     BREADY);
 
    // Import the properties in this scope
-   import definition_of_axi4_lite::*;
+   import amba_axi4_definition_of_axi4_lite::*;
    import amba_axi4_single_interface_requirements::*;
 
    // Default clocking for all properties
@@ -80,7 +80,7 @@ module amba_axi4_write_response_channel
    generate
       if(cfg.AGENT_TYPE == SOURCE || cfg.AGENT_TYPE == MONITOR) begin: source_properties
 	 // Section A3.1.2: Reset
-	 if(OPTIONAL_RESET == 1) begin: optional_reset
+	 if(cfg.OPTIONAL_RESET == 1) begin: optional_reset
 	    ap_B_SRC_DST_EXIT_RESET: assert property(exit_from_reset(ARESETn, BVALID))
 	      else $error("Violation: BVALID must be low for the first clock edge",
 			  "after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
@@ -97,7 +97,7 @@ module amba_axi4_write_response_channel
 
       else if (cfg.AGENT_TYPE == DESTINATION || cfg.AGENT_TYPE == CONSTRAINT) begin: destination_properties
 	 // Section A3.1.2: Reset
-	 if(OPTIONAL_RESET == 1) begin: optional_reset
+	 if(cfg.OPTIONAL_RESET == 1) begin: optional_reset
 	    cp_B_DST_SRC_EXIT_RESET: assume property(exit_from_reset(ARESETn, BVALID))
 	      else $error("Violation: BVALID must be low for the first clock edge",
 			  "after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");

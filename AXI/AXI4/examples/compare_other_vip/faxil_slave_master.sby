@@ -11,7 +11,7 @@ smtbmc boolector
 
 [script]
 read -sv amba_axi4_protocol_checker_pkg.sv
-read -sv definition_of_axi4_lite.sv
+read -sv amba_axi4_definition_of_axi4_lite.sv
 read -sv amba_axi4_single_interface_requirements.sv
 read -sv amba_axi4_write_data_channel.sv
 read -sv amba_axi4_write_response_channel.sv
@@ -28,7 +28,7 @@ prep -top faxil_slave_master
 
 [files]
 ../../src/amba_axi4_protocol_checker_pkg.sv
-../../src/axi4_spec/definition_of_axi4_lite.sv
+../../src/axi4_spec/amba_axi4_definition_of_axi4_lite.sv
 ../../src/axi4_spec/amba_axi4_single_interface_requirements.sv
 ../../src/amba_axi4_write_data_channel.sv
 ../../src/amba_axi4_write_response_channel.sv

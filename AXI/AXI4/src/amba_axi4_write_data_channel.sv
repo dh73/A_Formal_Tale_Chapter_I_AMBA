@@ -39,7 +39,7 @@ module amba_axi4_write_data_channel
     input wire 			     WREADY);
 
    // Import the properties in this scope
-   import definition_of_axi4_lite::*;
+   import amba_axi4_definition_of_axi4_lite::*;
    import amba_axi4_single_interface_requirements::*;
    // Default clocking for all properties
    default clocking axi4_aclk @(posedge ACLK); endclocking
@@ -81,7 +81,7 @@ module amba_axi4_write_data_channel
    generate
       if(cfg.AGENT_TYPE == SOURCE || cfg.AGENT_TYPE == MONITOR) begin: source_properties
 	 // Section A3.1.2: Reset
-	 if(OPTIONAL_RESET == 1) begin: optional_reset
+	 if(cfg.OPTIONAL_RESET == 1) begin: optional_reset
 	    ap_W_SRC_DST_EXIT_RESET: assert property(exit_from_reset(ARESETn, WVALID))
 	      else $error("Violation: WVALID must be low for the first clock edge",
 			  "after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
@@ -99,7 +99,7 @@ module amba_axi4_write_data_channel
 		       "occurs (A3.2.1 Handshake process, pA3-39).");
 
 	 // Section A3.4.3: Data read and write structure
-	 if(OPTIONAL_WSTRB == 1) begin: optional_wrstrb
+	 if(cfg.OPTIONAL_WSTRB == 1) begin: optional_wrstrb
 	    ap_W_FULL_TRANSACTION_OPTIONAL_WSTRB: assert property(disable iff (!ARESETn) full_data_transaction(WVALID, (WSTRB=={STRB_WIDTH{1'b1}})))
 	      else $error("Violation: The default value for write strobes is all signals asserted",
 			  "if the source is always performing full data width transactions (optional",
@@ -109,7 +109,7 @@ module amba_axi4_write_data_channel
 
       else if(cfg.AGENT_TYPE == DESTINATION || cfg.AGENT_TYPE == CONSTRAINT) begin: destination_properties
 	 // Section A3.1.2: Reset
-	 if(OPTIONAL_RESET == 1) begin: optional_reset
+	 if(cfg.OPTIONAL_RESET == 1) begin: optional_reset
 	    cp_W_DST_SRC_EXIT_RESET: assume property(exit_from_reset(ARESETn, WVALID))
 	      else $error("Violation: WVALID must be low for the first clock edge",
 			  "after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
@@ -127,7 +127,7 @@ module amba_axi4_write_data_channel
 		       "occurs  (A3.2.1 Handshake process, pA3-39).");
 
 	 // Section A3.4.3: Data read and write structure
-	 if(OPTIONAL_WSTRB == 1) begin: optional_wrstrb
+	 if(cfg.OPTIONAL_WSTRB == 1) begin: optional_wrstrb
 	    cp_W_FULL_TRANSACTION_OPTIONAL_WSTRB: assume property(disable iff (!ARESETn) full_data_transaction(WVALID, (WSTRB=={STRB_WIDTH{1'b1}})))
 	      else $error("Violation: The default value for write strobes is all signals asserted",
 			  "if the source is always performing full data width transactions (optional",
