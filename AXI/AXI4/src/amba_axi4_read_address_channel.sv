@@ -26,6 +26,7 @@ module amba_axi4_read_address_channel
        ENABLE_COVER:    1,
        ARM_RECOMMENDED: 1,
        MAXWAIT:         16,
+       OPTIONAL_RESET:  1,
        default:         0},
      // Read only
      localparam unsigned STRB_WIDTH = cfg.DATA_WIDTH/8)
@@ -55,7 +56,7 @@ module amba_axi4_read_address_channel
     *            Section B1.1: Definition of AXI4-Lite                *
     *            ><><><><><><><><><><><><><><><><><><><><             */
    generate
-      if (cfg.PROTOCOL_TYPE == AXI4LITE) begin: axi4lite_defs
+      if(cfg.PROTOCOL_TYPE == AXI4LITE) begin: axi4lite_defs
 	 // AXI4-Lite can have a burst size of either 4 (AWSIZE=3'b010) or 8 (AWSIZE=3'b011).
 	 // which is log2(STRB_WIDTH) [if WDATA = 32, STRB=32/8=4, log2(4)=2=AWSIZE of 3'b010.
 	 localparam MAX_SIZE = $clog2(STRB_WIDTH); // TODO, guard DW
@@ -97,12 +98,13 @@ module amba_axi4_read_address_channel
 	   else $error("Violation: For AR in AXI4-Lite, only signals described in B1.1 are",
 		       "required or supported (B1.1 Definition of AXI4-Lite, pB1-126).");
 
-         if (cfg.AGENT_TYPE == DESTINATION || cfg.AGENT_TYPE == MONITOR) begin: a_exclusive_responses
+         if(cfg.AGENT_TYPE == DESTINATION || cfg.AGENT_TYPE == MONITOR) begin: a_exclusive_responses
             ap_AR_UNSUPPORTED_EXCLUSIVE: assert property(disable iff (!ARESETn) unsupported_exclusive_access(ARVALID, ARLOCK, EXCLUSIVE))
               else $error("Violation: Exclusive read accesses are not supported in AXI4 Lite",
                           "(Definition of AXI4-Lite, pB1-126).");
          end
-         else if (cfg.AGENT_TYPE == SOURCE || cfg.AGENT_TYPE == CONSTRAINT) begin: c_exclusive_responses
+
+         else if(cfg.AGENT_TYPE == SOURCE || cfg.AGENT_TYPE == CONSTRAINT) begin: c_exclusive_responses
             cp_AR_UNSUPPORTED_EXCLUSIVE: assume property(disable iff (!ARESETn) unsupported_exclusive_access(ARVALID, ARLOCK, EXCLUSIVE))
               else $error("Violation: Exclusive read accesses are not supported in AXI4 Lite",
                           "(Definition of AXI4-Lite, pB1-126).");
@@ -114,37 +116,43 @@ module amba_axi4_read_address_channel
     *		 Chapter A3. Single Interface Requirements            *
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
    generate
-      if (cfg.AGENT_TYPE == SOURCE || cfg.AGENT_TYPE == MONITOR) begin: source_properties
+      if(cfg.AGENT_TYPE == SOURCE || cfg.AGENT_TYPE == MONITOR) begin: source_properties
 	 // Section A3.1.2: Reset
-	 ap_AR_SRC_DST_EXIT_RESET: assert property (exit_from_reset(ARESETn, ARVALID))
-	   else $error ("Violation: ARVALID must be low for the first clock edge",
-			"after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
+	 if(OPTIONAL_RESET == 1) begin: optional_reset
+	    ap_AR_SRC_DST_EXIT_RESET: assert property(exit_from_reset(ARESETn, ARVALID))
+	      else $error("Violation: ARVALID must be low for the first clock edge",
+			  "after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
+	 end
+
 	 // Section A3.2.1: Handshake process
-	 ap_AR_SRC_DST_STABLE_ARPROT: assert property (disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARPROT))
-	   else $error ("Violation: Once the master has asserted ARVALID, data and control information",
-			"from master must remain stable [ARPROT] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
-	 ap_AR_SRC_DST_STABLE_ARADDR: assert property (disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARADDR))
-	   else $error ("Violation: Once the master has asserted ARVALID, data and control information",
-			"from master must remain stable [ARADDR] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
-	 ap_AR_SRC_DST_ARVALID_until_ARREADY: assert property (disable iff (!ARESETn) valid_before_handshake(ARVALID, ARREADY))
-	   else $error ("Violation: Once ARVALID is asserted it must remain asserted until the handshake",
-			"occurs  (A3.2.1 Handshake process, pA3-39).");
+	 ap_AR_SRC_DST_STABLE_ARPROT: assert property(disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARPROT))
+	   else $error("Violation: Once the master has asserted ARVALID, data and control information",
+		       "from master must remain stable [ARPROT] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
+	 ap_AR_SRC_DST_STABLE_ARADDR: assert property(disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARADDR))
+	   else $error("Violation: Once the master has asserted ARVALID, data and control information",
+		       "from master must remain stable [ARADDR] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
+	 ap_AR_SRC_DST_ARVALID_until_ARREADY: assert property(disable iff (!ARESETn) valid_before_handshake(ARVALID, ARREADY))
+	   else $error("Violation: Once ARVALID is asserted it must remain asserted until the handshake",
+		       "occurs  (A3.2.1 Handshake process, pA3-39).");
       end // block: source_properties
 
-      else if (cfg.AGENT_TYPE == DESTINATION || cfg.AGENT_TYPE == CONSTRAINT) begin: destination_properties
+      else if(cfg.AGENT_TYPE == DESTINATION || cfg.AGENT_TYPE == CONSTRAINT) begin: destination_properties
 	 // Section A3.1.2: Reset
-	 cp_AR_DST_SRC_EXIT_RESET: assume property (exit_from_reset(ARESETn, ARVALID))
-	   else $error ("Violation: ARVALID must be low for the first clock edge after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
+	 if(OPTIONAL_RESET == 1) begin: optional_reset
+	    cp_AR_DST_SRC_EXIT_RESET: assume property(exit_from_reset(ARESETn, ARVALID))
+	      else $error("Violation: ARVALID must be low for the first clock edge after ARESETn goes high (A3.2.1 Reset, pA3-38, Figure A3-1).");
+	 end
+
 	 // Section A3.2.1: Handshake process
-	 cp_AR_DST_SRC_STABLE_AWPROT: assume property (disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARPROT))
-	   else $error ("Violation: Once the master has asserted ARVALID, data and control information",
-			"from master must remain stable [ARPROT] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
-	 cp_AR_DST_SRC_STABLE_AWADDR: assume property (disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARADDR))
-	   else $error ("Violation: Once the master has asserted ARVALID, data and control information",
-			"from master must remain stable [ARADDR] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
-	 cp_AR_DST_SRC_AWVALID_until_AWREADY: assume property (disable iff (!ARESETn) valid_before_handshake(ARVALID, ARREADY))
-	   else $error ("Violation: Once ARVALID is asserted it must remain asserted until the handshake",
-			"occurs  (A3.2.1 Handshake process, pA3-39).");
+	 cp_AR_DST_SRC_STABLE_AWPROT: assume property(disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARPROT))
+	   else $error("Violation: Once the master has asserted ARVALID, data and control information",
+		       "from master must remain stable [ARPROT] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
+	 cp_AR_DST_SRC_STABLE_AWADDR: assume property(disable iff (!ARESETn) stable_before_handshake(ARVALID, ARREADY, ARADDR))
+	   else $error("Violation: Once the master has asserted ARVALID, data and control information",
+		       "from master must remain stable [ARADDR] until ARREADY is asserted (A3.2.1 Handshake process, pA3-39, Figure A3-2).");
+	 cp_AR_DST_SRC_AWVALID_until_AWREADY: assume property(disable iff (!ARESETn) valid_before_handshake(ARVALID, ARREADY))
+	   else $error("Violation: Once ARVALID is asserted it must remain asserted until the handshake",
+		       "occurs  (A3.2.1 Handshake process, pA3-39).");
       end // block: destination_properties
    endgenerate
 
@@ -152,12 +160,13 @@ module amba_axi4_read_address_channel
    generate
       if (cfg.ARM_RECOMMENDED)
 	if (cfg.AGENT_TYPE == DESTINATION || cfg.AGENT_TYPE == MONITOR) begin: deadlock_check
-	   ap_AR_DST_SRC_READY_MAXWAIT: assert property (disable iff (!ARESETn) handshake_max_wait(ARVALID, ARREADY, cfg.MAXWAIT))
-	     else $error ("Violation: ARREADY should be asserted within MAXWAIT cycles of ARVALID being asserted (AMBA recommended.");
+	   ap_AR_DST_SRC_READY_MAXWAIT: assert property(disable iff (!ARESETn) handshake_max_wait(ARVALID, ARREADY, cfg.MAXWAIT))
+	     else $error("Violation: ARREADY should be asserted within MAXWAIT cycles of ARVALID being asserted (AMBA recommended.");
 	end
+
 	else if (cfg.AGENT_TYPE == SOURCE || cfg.AGENT_TYPE == CONSTRAINT) begin: deadlock_cons
-	   cp_AR_SRC_DST_READY_MAXWAIT: assume property (disable iff (!ARESETn) handshake_max_wait(ARVALID, ARREADY, cfg.MAXWAIT))
-	     else $error ("Violation: ARREADY should be asserted within MAXWAIT cycles of ARVALID being asserted (AMBA recommended).");
+	   cp_AR_SRC_DST_READY_MAXWAIT: assume property(disable iff (!ARESETn) handshake_max_wait(ARVALID, ARREADY, cfg.MAXWAIT))
+	     else $error("Violation: ARREADY should be asserted within MAXWAIT cycles of ARVALID being asserted (AMBA recommended).");
 	end
    endgenerate
 

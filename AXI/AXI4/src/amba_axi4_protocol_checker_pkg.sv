@@ -59,6 +59,7 @@ package amba_axi4_protocol_checker_pkg;
       bit	   ENABLE_COVER;
       bit	   ARM_RECOMMENDED;
       bit	   CHECK_PARAMETERS;
+      bit          OPTIONAL_WSTRB;	   
       bit	   OPTIONAL_RESET;
    } axi4_checker_params_t;
 endpackage // amba_axi4_protocol_checker_pkg

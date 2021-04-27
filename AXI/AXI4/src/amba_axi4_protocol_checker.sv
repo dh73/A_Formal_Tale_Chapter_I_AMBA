@@ -31,6 +31,7 @@ module amba_axi4_protocol_checker
        ENABLE_COVER:     1,
        ARM_RECOMMENDED:  1,
        CHECK_PARAMETERS: 1,
+       OPTIONAL_WSTRB:   1,
        OPTIONAL_RESET:   1},
      // Read only
      localparam unsigned STRB_WIDTH = cfg.DATA_WIDTH/8)

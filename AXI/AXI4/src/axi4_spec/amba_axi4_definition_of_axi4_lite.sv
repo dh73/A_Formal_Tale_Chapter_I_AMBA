@@ -14,9 +14,9 @@
  *  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *
  */
-`ifndef __DEFINITION_OF_AXI4_LITE__
- `define __DEFINITION_OF_AXI4_LITE__
-package definition_of_axi4_lite;
+`ifndef __AMBA_AXI4_DEFINITION_OF_AXI4_LITE__
+ `define __AMBA_AXI4_DEFINITION_OF_AXI4_LITE__
+package amba_axi4_definition_of_axi4_lite;
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
     *		 Section B1.1: Definition of AXI4-Lite                *
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
@@ -76,5 +76,5 @@ package definition_of_axi4_lite;
    property axi4_lite_unsupported_sig(axi4_lite_sig_bundle);
       axi4_lite_sig_bundle;
    endproperty // axi4_lite_unsupported_sig
-endpackage // definition_of_axi4_lite
-`endif //  `ifndef __DEFINITION_OF_AXI4_LITE__
+endpackage // amba_axi4_definition_of_axi4_lite
+`endif //  `ifndef __AMBA_AXI4_DEFINITION_OF_AXI4_LITE__

@@ -128,7 +128,29 @@ package amba_axi4_single_interface_requirements;
     *	      Section A3.2.2: Channel signaling requirements          *
     *		 ><><><><><><><><><><><><><><><><><><><><	      */
 
-   // TBD
+
+   /*		 ><><><><><><><><><><><><><><><><><><><><             *
+    *	        Section A3.4.3 Data read and write structure          *
+    *		 ><><><><><><><><><><><><><><><><><><><><	      */
+   /* There is a dependency of WSTRB from this section, linked to
+    * Section B1.1.3 Write strobes and Section A10.3.4 Write
+    * transactions for **unused WSTRB**. I apologize in advance for
+    * the mix of sections that I'm about to do, but for now I don't
+    * see a need for an extra package just for this property.         */
+
+   /* ,         ,                                                     *
+    * |\\\\ ////|  "The WSTRB [...] when HIGH, specify the byte lanes *
+    * | \\\V/// |   that contain valid information". A3.4.3, pA3-52.  *
+    * |	 |~~~|	|   "A master must ensure that the write strobes are  *
+    * |	 |===|	|    HIGH only for byte lanes that contain valid      *
+    * |	 |A  |	|    data". A3.4.3, pA3-52.                           *
+    * |	 | X |	|   "A master is not required to use the write strobe *
+    *  \ |  I| /     signals if it always perform full data bus width *
+    *   \|===|/	     transactions. The default value for wr strobes   *
+    *    '---'	     is all signals asserted". A10.3.4, pA10-121.     */
+   property full_data_transaction(valid, defaul_strb_value);
+      valid |-> default_strb_value;
+   endproperty // full_data_transaction
 
    /*		 ><><><><><><><><><><><><><><><><><><><><             *
     *	     Section A3.4.4 Read and write response structure         *
@@ -207,6 +229,6 @@ package amba_axi4_single_interface_requirements;
    property axi4_no_wait_state(valid, ready);
       !valid || ready ##1 valid && ready;
    endproperty // axi4_no_wait_state
-   
+
 endpackage // amba_axi4_single_interface_requirements
 `endif
