@@ -27,15 +27,15 @@ read -sv amba_axi4_monitor_agent.sv
 prep -top faxil_slave_master
 
 [files]
-../../src/amba_axi4_protocol_checker_pkg.sv
-../../src/axi4_spec/amba_axi4_definition_of_axi4_lite.sv
-../../src/axi4_spec/amba_axi4_single_interface_requirements.sv
-../../src/amba_axi4_write_data_channel.sv
-../../src/amba_axi4_write_response_channel.sv
-../../src/amba_axi4_read_data_channel.sv
-../../src/amba_axi4_protocol_checker.sv
-../../src/amba_axi4_write_address_channel.sv
-../../src/amba_axi4_read_address_channel.sv
+../../../src/amba_axi4_protocol_checker_pkg.sv
+../../../src/axi4_spec/amba_axi4_definition_of_axi4_lite.sv
+../../../src/axi4_spec/amba_axi4_single_interface_requirements.sv
+../../../src/amba_axi4_write_data_channel.sv
+../../../src/amba_axi4_write_response_channel.sv
+../../../src/amba_axi4_read_data_channel.sv
+../../../src/amba_axi4_protocol_checker.sv
+../../../src/amba_axi4_write_address_channel.sv
+../../../src/amba_axi4_read_address_channel.sv
 amba_axi4_monitor_agent.sv
 faxil_slave_master.v
 faxil_master.v

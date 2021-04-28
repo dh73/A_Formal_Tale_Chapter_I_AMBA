@@ -1,0 +1,56 @@
+[tasks]
+prove
+cover
+
+[options]
+prove: mode prove
+cover: mode cover
+smtc initial_values.smt
+
+[engines]
+smtbmc boolector
+
+[script]
+read -sv amba_axi4_protocol_checker_pkg.sv
+read -sv amba_axi4_definition_of_axi4_lite.sv
+read -sv amba_axi4_single_interface_requirements.sv
+read -sv amba_axi4_write_data_channel.sv
+read -sv amba_axi4_write_response_channel.sv
+read -sv amba_axi4_read_data_channel.sv
+read -sv amba_axi4_protocol_checker.sv
+read -sv amba_axi4_write_address_channel.sv
+read -sv amba_axi4_read_address_channel.sv
+read -sv Axi4PC_defs.v
+read -sv Axi4PC_undefs.v
+read -sv Axi4PC_message_defs.v
+read -sv Axi4PC_message_undefs.v
+read -sv Axi4LitePC_message_defs.v
+read -sv Axi4LitePC_message_undefs.v
+read -sv Axi4PC.sv
+read -sv Axi4LitePC.sv
+read -sv amba_axi4_monitor_agent.sv
+read -sv amba_axi4_constraint_agent.sv
+
+prep -top Axi4LitePC
+
+[files]
+../../../src/amba_axi4_protocol_checker_pkg.sv
+../../../src/axi4_spec/amba_axi4_definition_of_axi4_lite.sv
+../../../src/axi4_spec/amba_axi4_single_interface_requirements.sv
+../../../src/amba_axi4_write_data_channel.sv
+../../../src/amba_axi4_write_response_channel.sv
+../../../src/amba_axi4_read_data_channel.sv
+../../../src/amba_axi4_protocol_checker.sv
+../../../src/amba_axi4_write_address_channel.sv
+../../../src/amba_axi4_read_address_channel.sv
+amba_axi4_monitor_agent.sv
+amba_axi4_constraint_agent.sv
+Axi4PC_defs.v
+Axi4PC_undefs.v
+Axi4LitePC_message_defs.v
+Axi4LitePC_message_undefs.v
+Axi4PC_message_defs.v
+Axi4PC_message_undefs.v
+Axi4PC.sv
+Axi4LitePC.sv
+initial_values.smt
